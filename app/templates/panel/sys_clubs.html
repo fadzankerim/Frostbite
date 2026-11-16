@@ -1,0 +1,33 @@
+{% extends 'base.html' %}{% load ui %}
+{% block title %}Društva{% endblock %}
+{% block content %}
+{% with tab='clubs' heading='Društva' %}{% include 'panel/_sys_nav.html' %}{% endwith %}
+<h2 class="section-title">Zahtjevi na čekanju</h2>
+{% if pending %}
+  <ul class="list">
+    {% for c in pending %}
+      <li class="list-row"><span class="club-icon">{% icon 'tent' %}</span>
+        <div class="list-main"><strong>{{ c.name }}</strong>
+          <span class="meta">{{ c.city }} · podnio {{ c.created_by.get_full_name }} ({{ c.created_by.email }}) · {{ c.created_at|date:"d.m.Y." }}</span></div>
+        <form method="post" action="{% url 'panel:sys_club_decide' c.pk 'approve' %}">{% csrf_token %}
+          <button class="btn btn-sm" type="submit">{% icon 'check' %}Odobri</button></form>
+        <form method="post" action="{% url 'panel:sys_club_decide' c.pk 'reject' %}">{% csrf_token %}
+          <button class="btn btn-ghost btn-sm" type="submit">{% icon 'x' %}Odbij</button></form>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}<div class="empty">{% icon 'tent' 'icon-lg' %}<p>Nema zahtjeva na čekanju.</p></div>{% endif %}
+
+<h2 class="section-title">Sva društva</h2>
+<ul class="list list-quiet">
+  {% for c in others %}
+    <li class="list-row"><strong class="list-main">{{ c.name }} <span class="meta">{{ c.city }}</span></strong>
+      <span class="pill {{ c.status|status_class }}">{{ c.get_status_display }}</span>
+      {% if c.status == 'ODOBRENO' %}
+        <form method="post" action="{% url 'panel:sys_club_decide' c.pk 'suspend' %}">{% csrf_token %}
+          <button class="btn btn-danger btn-sm" type="submit">Suspenduj</button></form>
+      {% endif %}
+    </li>
+  {% endfor %}
+</ul>
+{% endblock %}

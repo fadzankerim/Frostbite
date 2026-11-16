@@ -1,0 +1,31 @@
+{% extends 'base.html' %}{% load ui %}
+{% block title %}Članovi{% endblock %}
+{% block content %}
+{% with tab='members' %}{% include 'panel/_club_nav.html' %}{% endwith %}
+<h2 class="section-title">Zahtjevi za članstvo</h2>
+{% if pending %}
+  <ul class="list">
+    {% for m in pending %}
+      <li class="list-row">
+        <span class="avatar">{{ m.user.first_name|first }}{{ m.user.last_name|first }}</span>
+        <div class="list-main"><strong>{{ m.user.get_full_name }}</strong><span class="meta">Zahtjev od {{ m.created_at|date:"d.m.Y." }}</span></div>
+        <form method="post" action="{% url 'panel:membership_decide' club.pk m.pk 'approve' %}">{% csrf_token %}
+          <button class="btn btn-sm" type="submit">{% icon 'check' %}Odobri</button></form>
+        <form method="post" action="{% url 'panel:membership_decide' club.pk m.pk 'reject' %}">{% csrf_token %}
+          <button class="btn btn-ghost btn-sm" type="submit">{% icon 'x' %}Odbij</button></form>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}<div class="empty">{% icon 'user-plus' 'icon-lg' %}<p>Nema zahtjeva na čekanju.</p></div>{% endif %}
+
+<h2 class="section-title">Članovi ({{ active|length }})</h2>
+{% if active %}
+  <ul class="list list-quiet">
+    {% for m in active %}
+      <li class="list-row"><span class="avatar">{{ m.user.first_name|first }}{{ m.user.last_name|first }}</span>
+        <strong class="list-main">{{ m.user.get_full_name }}</strong>
+        <span class="pill pill-ok">do {{ m.valid_until|date:"d.m.Y." }}</span></li>
+    {% endfor %}
+  </ul>
+{% else %}<div class="empty"><p>Društvo još nema članova.</p></div>{% endif %}
+{% endblock %}

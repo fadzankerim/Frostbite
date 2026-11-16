@@ -1,0 +1,30 @@
+{% extends 'base.html' %}{% load ui %}
+{% block title %}Moja članstva{% endblock %}
+{% block content %}
+<section class="page-head"><h1>Moja članstva</h1></section>
+{% if items %}
+  <ul class="list">
+    {% for m in items %}
+      <li class="list-row">
+        <span class="club-icon">{% icon 'tent' %}</span>
+        <a class="list-main" href="{% url 'clubs:detail' m.club.pk %}">
+          <strong>{{ m.club.name }}</strong>
+          <span class="meta">Zahtjev poslan {{ m.created_at|date:"d.m.Y." }}</span>
+        </a>
+        {% if m.expired %}
+          <span class="pill">Isteklo {{ m.valid_until|date:"d.m.Y." }}</span>
+        {% elif m.status == 'ODOBRENO' %}
+          <span class="pill pill-ok">Član{% if m.valid_until %} do {{ m.valid_until|date:"d.m.Y." }}{% endif %}</span>
+        {% elif m.status == 'ZAHTJEV' %}
+          <span class="pill pill-wait">Na čekanju</span>
+        {% else %}
+          <span class="pill pill-err">{{ m.get_status_display }}</span>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <div class="empty">{% icon 'badge-check' 'icon-lg' %}<p>Niste član nijednog društva.</p>
+    <a class="btn btn-ghost" href="{% url 'clubs:list' %}">Pregledaj društva</a></div>
+{% endif %}
+{% endblock %}

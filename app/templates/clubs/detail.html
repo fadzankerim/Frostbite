@@ -1,0 +1,35 @@
+{% extends 'base.html' %}{% load ui %}
+{% block title %}{{ club.name }}{% endblock %}
+{% block content %}
+<a class="back" href="{% url 'clubs:list' %}">{% icon 'arrow-left' %}Sva društva</a>
+<section class="club-head">
+  <span class="club-icon club-icon-lg">{% icon 'tent' %}</span>
+  <div class="club-head-main">
+    <h1>{{ club.name }}</h1>
+    <p class="meta">{% icon 'map-pin' %}{{ club.city }}
+      {% if club.email %} · {% icon 'mail' %}{{ club.email }}{% endif %}
+      {% if club.phone %} · {% icon 'phone' %}{{ club.phone }}{% endif %}</p>
+    {% if club.description %}<p class="prose">{{ club.description|linebreaksbr }}</p>{% endif %}
+  </div>
+  <div class="club-head-action">
+    {% if membership and membership.status == 'ODOBRENO' %}
+      <span class="pill pill-ok">{% icon 'badge-check' %}Član{% if membership.valid_until %} do {{ membership.valid_until|date:"d.m.Y." }}{% endif %}</span>
+    {% elif membership and membership.status == 'ZAHTJEV' %}
+      <span class="pill pill-wait">{% icon 'hourglass' %}Zahtjev na čekanju</span>
+    {% elif user.is_authenticated and not role_sysadmin %}
+      <form method="post" action="{% url 'clubs:membership_request' club.pk %}">
+        {% csrf_token %}<button type="submit" class="btn">{% icon 'user-plus' %}Zatraži članstvo</button>
+      </form>
+    {% elif not user.is_authenticated %}
+      <a class="btn btn-ghost" href="{% url 'accounts:login' %}?next={{ request.path|urlencode }}">{% icon 'log-in' %}Prijavite se za članstvo</a>
+    {% endif %}
+  </div>
+</section>
+
+<h2 class="section-title">Ture u narednih 30 dana</h2>
+{% if tours %}
+  <div class="grid">{% for t in tours %}{% include 'tours/_card.html' %}{% endfor %}</div>
+{% else %}
+  <div class="empty">{% icon 'mountain' 'icon-lg' %}<p>Društvo trenutno nema objavljenih tura.</p></div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,68 @@
+{% load static ui %}<!DOCTYPE html>
+<html lang="bs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Frostbite{% endblock %} · Frostbite</title>
+  <meta name="theme-color" content="#2f5d46">
+  <meta name="description" content="Frostbite: planinarske ture, društva i vodiči na jednom mjestu.">
+  <link rel="icon" href="{% static 'favicon.svg' %}" type="image/svg+xml">
+  <link rel="icon" href="{% static 'favicon-32.png' %}" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="{% static 'apple-touch-icon.png' %}">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  <script src="{% static 'js/app.js' %}"></script>
+  {% block head %}{% endblock %}
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <a class="brand" href="{% url 'home' %}">{% icon 'mountain-snow' 'brand-icon' %}<span>Frostbite</span></a>
+    <nav class="nav">
+      <a href="{% url 'tours:list' %}" class="nav-link">{% icon 'compass' %}<span>Ture</span></a>
+      <a href="{% url 'clubs:list' %}" class="nav-link">{% icon 'tent' %}<span>Društva</span></a>
+      {% if not role_sysadmin %}
+        <a href="{% url 'tours:selection' %}" class="nav-link">{% icon 'list-checks' %}<span>Odabir</span>
+          {% if request.session.tour_selection %}<span class="count">{{ request.session.tour_selection|length }}</span>{% endif %}</a>
+      {% endif %}
+      {% if user.is_authenticated %}
+        <details class="menu">
+          <summary class="nav-link">{% icon 'user' %}<span>{{ user.first_name }}</span></summary>
+          <div class="menu-panel">
+            {% if not role_sysadmin %}
+              <a href="{% url 'tours:my_registrations' %}">{% icon 'ticket' %}Moje prijave</a>
+              <a href="{% url 'clubs:my_memberships' %}">{% icon 'badge-check' %}Moja članstva</a>
+            {% endif %}
+            {% if role_guide %}<a href="{% url 'panel:guide' %}">{% icon 'footprints' %}Vođenje tura</a>{% endif %}
+            {% if role_admin %}<a href="{% url 'panel:club_choose' %}">{% icon 'building-2' %}Upravljanje društvom</a>{% endif %}
+            {% if role_sysadmin %}
+              <a href="{% url 'panel:sys_clubs' %}">{% icon 'tent' %}Društva (odobravanje)</a>
+              <a href="{% url 'panel:sys_users' %}">{% icon 'users' %}Korisnici</a>
+              <a href="{% url 'panel:sys_audit' %}">{% icon 'shield-check' %}Evidencija aktivnosti</a>
+            {% endif %}
+            <a href="{% url 'accounts:profile' %}">{% icon 'settings' %}Profil</a>
+            <form method="post" action="{% url 'accounts:logout' %}">
+              {% csrf_token %}<button type="submit">{% icon 'log-out' %}Odjava</button>
+            </form>
+          </div>
+        </details>
+      {% else %}
+        <a href="{% url 'accounts:login' %}" class="nav-link">{% icon 'log-in' %}<span>Prijava</span></a>
+        <a class="btn btn-sm" href="{% url 'accounts:register' %}">Registracija</a>
+      {% endif %}
+    </nav>
+  </div>
+</header>
+
+<main class="wrap main">
+  {% if messages %}
+    <ul class="messages">
+      {% for m in messages %}
+        <li class="msg msg-{{ m.tags }}">{% if m.tags == 'error' %}{% icon 'triangle-alert' %}{% else %}{% icon 'circle-check' %}{% endif %}<span>{{ m }}</span></li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+  {% block content %}{% endblock %}
+</main>
+{% block scripts %}{% endblock %}
+</body>
+</html>

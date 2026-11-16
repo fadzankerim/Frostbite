@@ -1,0 +1,47 @@
+{% extends 'base.html' %}{% load static ui %}
+{% block title %}{% if tour %}Uredi turu{% else %}Nova tura{% endif %}{% endblock %}
+{% block head %}<link rel="stylesheet" href="{% static 'vendor/leaflet/leaflet.css' %}">{% endblock %}
+{% block content %}
+<a class="back" href="{% if tour %}{% url 'panel:club_tour' club.pk tour.pk %}{% else %}{% url 'panel:club' club.pk %}{% endif %}">{% icon 'arrow-left' %}Nazad</a>
+<section class="page-head"><h1>{% if tour %}Uredi turu{% else %}Nova tura{% endif %}</h1>
+  <p class="lead">{{ club.name }}{% if not tour %} · tura se čuva kao nacrt{% endif %}</p></section>
+
+<form method="post" novalidate class="tour-form">
+  {% csrf_token %}
+  {% if form.non_field_errors %}<div class="errorlist nonfield">{{ form.non_field_errors }}</div>{% endif %}
+  <div class="panel">
+    <h2>{% icon 'map' %}Ruta</h2>
+    <p class="hint left">Kliknite na mapu da dodate tačke rute redom od polaska do cilja, ili uvezite GPX datoteku
+      (iz Garmin, Strava, Wikiloc, Komoot...). GPX se čita u vašem pregledniku i ne šalje se na server; šalju se samo koordinate.</p>
+    <div id="route-editor" class="map map-editor"></div>
+    <div class="toolbar">
+      <button type="button" class="btn btn-ghost btn-sm" id="route-undo">{% icon 'arrow-left' %}Poništi tačku</button>
+      <button type="button" class="btn btn-ghost btn-sm" id="route-clear">{% icon 'trash-2' %}Obriši rutu</button>
+      <label class="btn btn-ghost btn-sm file-btn">{% icon 'route' %}Uvezi GPX
+        <input type="file" id="gpx-file" accept=".gpx,application/gpx+xml" class="sr-only"></label>
+      <span class="meta" id="route-info"></span>
+    </div>
+    <p class="meta" id="route-start" hidden>{% icon 'map-pin' %}<span id="route-start-text"></span>
+      <a id="route-start-link" target="_blank" rel="noopener noreferrer">Provjeri u Google mapama</a></p>
+    <p class="form-error" id="gpx-error" hidden></p>
+    {{ form.route }}
+    {% if form.route.errors %}<div class="errorlist">{{ form.route.errors }}</div>{% endif %}
+  </div>
+
+  <div class="panel form-grid">
+    {% for field in form.visible_fields %}
+      <div class="field {% if field.name == 'description' or field.name == 'required_equipment' or field.name == 'name' %}span-2{% endif %} {% if field.field.widget.input_type == 'checkbox' %}field-check{% endif %}">
+        {{ field.label_tag }}{{ field }}
+        {% if field.help_text %}<span class="helptext">{{ field.help_text }}</span>{% endif %}
+        {{ field.errors }}
+      </div>
+    {% endfor %}
+  </div>
+  <div class="actions"><button type="submit" class="btn">{% icon 'check' %}Sačuvaj turu</button></div>
+</form>
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'vendor/leaflet/leaflet.js' %}"></script>
+  <script src="{% static 'js/map-layers.js' %}"></script>
+<script src="{% static 'js/route-editor.js' %}"></script>
+{% endblock %}

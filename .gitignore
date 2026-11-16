@@ -1,0 +1,60 @@
+# --- Lokalni dokumenti (namjerno izvan repozitorija) -------------------------
+/docs
+UPUTSTVO.md
+ips.txt
+*.docx
+
+# --- Tajne i pristupni podaci (NIKAD u git) ----------------------------------
+users.txt
+*.pem
+*.key
+*.crt
+*.ovpn
+*.env
+.env
+.env.*
+!.env.example
+db.env
+app.env
+secrets*
+
+# --- Python / Django ---------------------------------------------------------
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# lokalna razvojna baza i generisane statičke datoteke
+*.sqlite3
+*.sqlite3-journal
+app/staticfiles/
+app/static/_preview/
+media/
+
+# --- Node (generatori dokumentacije) -----------------------------------------
+node_modules/
+npm-debug.log*
+
+# --- Logovi i privremene datoteke --------------------------------------------
+*.log
+*.tmp
+*.bak
+*.swp
+*~
+~$*
+.~lock.*
+
+# --- Editori i operativni sistem ---------------------------------------------
+.vscode/
+.idea/
+*.code-workspace
+.DS_Store
+Thumbs.db
+desktop.ini

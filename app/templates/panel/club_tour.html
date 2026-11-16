@@ -1,0 +1,77 @@
+{% extends 'base.html' %}{% load ui %}
+{% block title %}{{ tour.name }}{% endblock %}
+{% block content %}
+<a class="back" href="{% url 'panel:club_tours' club.pk %}">{% icon 'arrow-left' %}Ture društva</a>
+<header class="detail-hero detail-hero-sm">
+  {% tour_art tour 'hero' %}
+  <div class="detail-hero-text">
+    <div class="tour-card-top"><span class="pill {{ tour.status|status_class }}">{{ tour.get_status_display }}</span>
+      <span class="badge badge-solid {{ tour.difficulty|difficulty_class }}">{{ tour.get_difficulty_display }}</span></div>
+    <h1>{{ tour.name }}</h1>
+    <p class="meta">{% icon 'calendar' %}{{ tour.start_at|date:"d.m.Y. H:i" }} · rok prijave {{ tour.registration_deadline|date:"d.m.Y. H:i" }}</p>
+  </div>
+</header>
+
+<div class="toolbar">
+  {% if editable %}<a class="btn btn-ghost btn-sm" href="{% url 'panel:tour_edit' club.pk tour.pk %}">{% icon 'settings' %}Uredi</a>{% endif %}
+  {% if tour.status == 'NACRT' %}
+    <form method="post" action="{% url 'panel:tour_transition' club.pk tour.pk 'publish' %}">{% csrf_token %}
+      <button class="btn btn-sm" type="submit">{% icon 'flag' %}Objavi</button></form>
+  {% endif %}
+  {% if tour.status == 'OBJAVLJENA' %}
+    <form method="post" action="{% url 'panel:tour_transition' club.pk tour.pk 'close' %}">{% csrf_token %}
+      <button class="btn btn-ghost btn-sm" type="submit">{% icon 'lock' %}Zatvori prijave</button></form>
+  {% endif %}
+  {% if tour.status == 'OBJAVLJENA' or tour.status == 'PRIJAVE_ZATVORENE' %}
+    <form method="post" action="{% url 'panel:tour_transition' club.pk tour.pk 'cancel' %}">{% csrf_token %}
+      <button class="btn btn-danger btn-sm" type="submit">{% icon 'circle-x' %}Otkaži turu</button></form>
+  {% endif %}
+  {% if tour.status == 'OBJAVLJENA' %}<a class="btn btn-ghost btn-sm" href="{% url 'tours:detail' tour.pk %}">{% icon 'compass' %}Javna stranica</a>{% endif %}
+</div>
+
+<div class="two-col">
+  <div>
+    <h2 class="section-title">Prijave ({{ regs|length }})</h2>
+    {% if regs %}
+      <ul class="list">
+        {% for r in regs %}
+          <li class="list-row"><span class="avatar">{{ r.user.first_name|first }}{{ r.user.last_name|first }}</span>
+            <strong class="list-main">{{ r.user.first_name }} {{ r.user.last_name }}</strong>
+            {% if r.attendance %}<span class="pill">{{ r.get_attendance_display }}</span>{% endif %}
+            <span class="pill {{ r.status|status_class }}">{{ r.get_status_display }}</span></li>
+        {% endfor %}
+      </ul>
+    {% else %}<div class="empty">{% icon 'users' 'icon-lg' %}<p>Još nema prijava.</p></div>{% endif %}
+  </div>
+  <div>
+    <h2 class="section-title">Vodiči</h2>
+    {% if apps %}
+      <ul class="list">
+        {% for a in apps %}
+          <li class="list-row"><span class="avatar">{{ a.user.first_name|first }}{{ a.user.last_name|first }}</span>
+            <strong class="list-main">{{ a.user.get_full_name }}</strong>
+            {% if a.status == 'PRIJAVIO_SE' %}
+              <form method="post" action="{% url 'panel:guide_decide' club.pk tour.pk a.pk 'approve' %}">{% csrf_token %}
+                <button class="btn btn-sm" type="submit">{% icon 'check' %}Odobri</button></form>
+              <form method="post" action="{% url 'panel:guide_decide' club.pk tour.pk a.pk 'reject' %}">{% csrf_token %}
+                <button class="btn btn-ghost btn-sm" type="submit">{% icon 'x' %}Odbij</button></form>
+            {% else %}<span class="pill {{ a.status|status_class }}">{{ a.get_status_display }}</span>{% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}<div class="empty"><p>Nijedan vodič se još nije prijavio.</p></div>{% endif %}
+    {% if assignable %}
+      <form method="post" action="{% url 'panel:guide_assign' club.pk tour.pk %}" class="assign">
+        {% csrf_token %}
+        <label for="assign-guide">{% icon 'user-plus' %}Dodijeli vodiča direktno</label>
+        <div class="assign-row">
+          <select id="assign-guide" name="guide" required>
+            {% for g in assignable %}<option value="{{ g.pk }}">{{ g.user.get_full_name }}{% if g.license_number %} · {{ g.license_number }}{% endif %}</option>{% endfor %}
+          </select>
+          <button type="submit" class="btn btn-sm">Dodijeli</button>
+        </div>
+      </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

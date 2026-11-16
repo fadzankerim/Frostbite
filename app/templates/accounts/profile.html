@@ -1,0 +1,21 @@
+{% extends 'base.html' %}{% load ui %}
+{% block title %}Moj profil{% endblock %}
+{% block content %}
+<div class="panel narrow">
+  <span class="club-icon">{% icon 'user' %}</span>
+  <h1>Moj profil</h1>
+  <p class="meta">{% icon 'mail' %}{{ user.email }}</p>
+  <div class="roles">
+    {% if role_sysadmin %}<span class="pill">{% icon 'shield-check' %}Sistemski admin</span>{% endif %}
+    {% if role_admin %}<span class="pill">{% icon 'building-2' %}Admin društva</span>{% endif %}
+    {% if role_guide %}<span class="pill">{% icon 'footprints' %}Vodič</span>{% endif %}
+    {% if not role_sysadmin %}<span class="pill">{% icon 'mountain' %}Planinar</span>{% endif %}
+  </div>
+  <form method="post" novalidate class="form">
+    {% csrf_token %}
+    {{ form.as_div }}
+    <button type="submit" class="btn btn-block">Sačuvaj promjene</button>
+  </form>
+  <p class="hint"><a href="{% url 'accounts:password_change' %}">{% icon 'lock' %}Promjena lozinke</a></p>
+</div>
+{% endblock %}

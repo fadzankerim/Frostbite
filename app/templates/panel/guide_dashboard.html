@@ -1,0 +1,49 @@
+{% extends 'base.html' %}{% load ui %}
+{% block title %}Vođenje tura{% endblock %}
+{% block content %}
+<section class="page-head"><p class="eyebrow">{% icon 'footprints' %}Vodič</p><h1>Vođenje tura</h1>
+  <p class="lead">Ture vaših društava kojima je potreban vodič. Admin društva odobrava prijavu.</p></section>
+
+<h2 class="section-title">Ture za koje se možete prijaviti</h2>
+{% if open_tours %}
+  <div class="grid">
+    {% for t in open_tours %}
+      <article class="tour-card {{ t.difficulty|difficulty_class }}-card guide-card reveal">
+        <div class="tour-card-art">
+          {% tour_art t %}
+          <div class="tour-card-badges"><span class="badge badge-solid {{ t.difficulty|difficulty_class }}">{{ t.get_difficulty_display }}</span></div>
+          <span class="date-chip"><b>{{ t.start_at|date:"d" }}</b>{{ t.start_at|date:"M" }}</span>
+        </div>
+        <div class="tour-card-body">
+          <h3>{{ t.name }}</h3>
+          <p class="meta">{% icon 'tent' %}{{ t.club.name }}{% if t.region %} · {{ t.region }}{% endif %}</p>
+          <p class="meta">{% icon 'clock' %}{{ t.start_at|date:"l, d.m. H:i" }}</p>
+          <div class="stats">
+            <span>{% icon 'route' %}{{ t.length_km }} km</span><span>{% icon 'trending-up' %}{{ t.elevation_gain_m }} m</span><span>{% icon 'hourglass' %}{{ t.duration_h }} h</span>
+          </div>
+          {% if t.applied %}
+            <span class="pill pill-wait pill-block">{% icon 'hourglass' %}Prijava poslana, čeka odobrenje</span>
+          {% else %}
+            <form method="post" action="{% url 'panel:guide_apply' t.pk %}">{% csrf_token %}
+              <button class="btn btn-sm btn-block" type="submit">{% icon 'flag' %}Želim voditi ovu turu</button></form>
+          {% endif %}
+        </div>
+      </article>
+    {% endfor %}
+  </div>
+{% else %}<div class="empty">{% icon 'circle-check' 'icon-lg' %}<p>Sve ture vaših društava imaju vodiča.</p></div>{% endif %}
+
+<h2 class="section-title">Ture koje vodim</h2>
+{% if mine %}
+  <ul class="list">
+    {% for t in mine %}
+      <li class="list-row">
+        <a class="list-main" href="{% url 'panel:guide_tour' t.pk %}"><strong>{{ t.name }}</strong>
+          <span class="meta">{% icon 'calendar' %}{{ t.start_at|date:"d.m.Y. H:i" }} · {{ t.club.name }}</span></a>
+        <span class="pill {{ t.status|status_class }}">{{ t.get_status_display }}</span>
+        {% icon 'chevron-right' 'chev' %}
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}<div class="empty">{% icon 'footprints' 'icon-lg' %}<p>Trenutno ne vodite nijednu turu.</p></div>{% endif %}
+{% endblock %}
