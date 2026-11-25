@@ -1,0 +1,78 @@
+# Frostbite u Dockeru: Nginx (TLS) -> Django/Gunicorn -> PostgreSQL.
+#
+#   cp .env.example .env        # pa upišite tajne
+#   docker compose up -d --build
+#   docker compose exec backend python manage.py create_system_admin
+#
+# Vani je izložen samo Nginx (80/443). Baza je na internoj mreži bez pristupa internetu.
+
+name: frostbite
+
+services:
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-frostbite}
+      POSTGRES_USER: ${DB_USER:-frostbite}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Postavite DB_PASSWORD u .env}
+    volumes:
+      - db-data:/var/lib/postgresql
+    networks: [internal]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    security_opt: [no-new-privileges:true]
+
+  backend:
+    build: ./app
+    image: frostbite-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      FROSTBITE_ENV: production
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?Postavite DJANGO_SECRET_KEY u .env}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost}
+      DB_NAME: ${DB_NAME:-frostbite}
+      DB_USER: ${DB_USER:-frostbite}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: db
+      DB_PORT: "5432"
+    networks: [internal, web]
+    # Kod je samo za čitanje; Gunicorn koristi /dev/shm za svoje privremene datoteke
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+    image: frostbite-web
+    restart: unless-stopped
+    depends_on: [backend]
+    environment:
+      TLS_CN: ${TLS_CN:-localhost}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # Samopotpisani certifikat se generiše pri prvom pokretanju.
+      # Za vlastiti certifikat zamijenite sa: ./certs:/etc/nginx/certs:ro
+      - certs:/etc/nginx/certs
+    networks: [web]
+    security_opt: [no-new-privileges:true]
+
+networks:
+  internal:
+    internal: true       # bez izlaza na internet (baza i backend)
+  web: {}
+
+volumes:
+  db-data:
+  certs:

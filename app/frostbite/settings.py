@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
     'accounts',
     'clubs',
     'tours',
@@ -151,6 +152,15 @@ X_FRAME_OPTIONS = 'DENY'
 DATA_UPLOAD_MAX_MEMORY_SIZE = 256 * 1024
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 200
 FILE_UPLOAD_MAX_MEMORY_SIZE = 0          # aplikacija ne prima datoteke
+
+# --- JSON API (/api/) -------------------------------------------------------
+# Samo sesija (bez tokena), samo JSON (bez "browsable API" stranica), zabranjeno po defaultu.
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': ['frostbite.authentication.StrictSessionAuthentication'],
+    'DEFAULT_PERMISSION_CLASSES': ['rest_framework.permissions.IsAuthenticated'],
+    'DEFAULT_RENDERER_CLASSES': ['rest_framework.renderers.JSONRenderer'],
+    'DEFAULT_PARSER_CLASSES': ['rest_framework.parsers.JSONParser'],
+}
 
 # --- Lokalizacija ----------------------------------------------------------
 LANGUAGE_CODE = 'bs'

@@ -1,7 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
-from django.db import IntegrityError, transaction
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.decorators.http import require_http_methods
@@ -9,7 +8,7 @@ from django.views.decorators.http import require_http_methods
 from audit.log import audit
 
 from .forms import BosnianPasswordChangeForm, LoginForm, ProfileForm, RegistrationForm
-from .models import User
+from .services import register_hiker
 
 REGISTER_DONE_MSG = 'Registracija je završena. Prijavite se svojim emailom i lozinkom.'
 
@@ -21,20 +20,7 @@ def register(request):
         return redirect('home')
     form = RegistrationForm(request.POST or None)
     if request.method == 'POST' and form.is_valid():
-        d = form.cleaned_data
-        try:
-            with transaction.atomic():
-                if User.objects.filter(email=d['email']).exists():
-                    raise IntegrityError
-                user = User.objects.create_user(
-                    email=d['email'], password=d['password1'],
-                    first_name=d['first_name'], last_name=d['last_name'], phone=d['phone'],
-                )
-            audit(request, 'REGISTRACIJA', 'user', user.pk, user=user)
-        except IntegrityError:
-            # Email već postoji: isti odgovor kao za uspjeh (politika 4.4 - bez otkrivanja naloga).
-            User().set_password(d['password1'])        # izjednačavanje vremena odgovora
-            audit(request, 'REGISTRACIJA_DUPLIKAT', 'user', details='email već postoji')
+        register_hiker(request, form.cleaned_data)
         messages.success(request, REGISTER_DONE_MSG)
         return redirect('accounts:login')
     return render(request, 'accounts/register.html', {'form': form})

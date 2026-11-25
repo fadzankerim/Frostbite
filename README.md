@@ -13,6 +13,8 @@ Planinarska društva objavljuju ture, upravljaju vodičima i članovima. Planina
 - [Tehnologije](#tehnologije)
 - [Struktura projekta](#struktura-projekta)
 - [Lokalno pokretanje](#lokalno-pokretanje)
+- [Pokretanje u Dockeru](#pokretanje-u-dockeru)
+- [JSON API](#json-api)
 - [Demo nalozi](#demo-nalozi)
 - [Testovi](#testovi)
 - [Postavljanje na AWS](#postavljanje-na-aws)
@@ -112,6 +114,58 @@ rm dev.sqlite3
 ```bash
 .venv/bin/python manage.py create_system_admin
 ```
+
+## Pokretanje u Dockeru
+
+Potrebno: Docker sa Compose pluginom. Aplikacija radi u produkcijskom režimu (PostgreSQL, HTTPS, `__Host-` kolačići).
+
+```bash
+cp .env.example .env          # upišite DJANGO_SECRET_KEY i DB_PASSWORD
+docker compose up -d --build
+docker compose exec backend python manage.py create_system_admin
+```
+
+Aplikacija je na `https://localhost` (samopotpisani certifikat, pregledač će tražiti potvrdu).
+
+| Servis | Uloga | Izložen |
+|---|---|---|
+| `web` | Nginx: TLS, sigurnosna zaglavlja, CSP, rate limit, statičke datoteke | 80, 443 |
+| `backend` | Django + Gunicorn, ne-root korisnik, datotečni sistem samo za čitanje | ne |
+| `db` | PostgreSQL 18 na internoj mreži bez izlaza na internet | ne |
+
+Backend pri svakom pokretanju izvrši `check --deploy`, migracije i `clearsessions`.
+Pravi certifikat: stavite `fullchain.crt` i `privkey.key` u `./certs` i u `docker-compose.yml`
+zamijenite volume `certs` sa `./certs:/etc/nginx/certs:ro`.
+
+Korisne komande:
+
+```bash
+docker compose logs -f backend                    # logovi
+docker compose exec backend python manage.py shell
+docker compose down                               # zaustavljanje (podaci ostaju)
+docker compose down -v                            # zaustavljanje i BRISANJE baze
+```
+
+`seed_demo` ne radi u Dockeru jer odbija PostgreSQL bazu. Demo podaci su samo za lokalni razvoj.
+
+## JSON API
+
+API za React frontend je pod `/api/` (Django REST Framework). Autentikacija je ista kao za
+HTML stranice: Django sesija u `HttpOnly` kolačiću, bez JWT-a i bez tokena u pregledaču.
+Svaki zahtjev koji mijenja stanje mora imati zaglavlje `X-CSRFToken`, i za neprijavljene
+korisnike (zaštita od login CSRF-a). API prima i vraća samo JSON, i ništa nije dozvoljeno bez prijave
+osim endpointa koji to izričito dozvoljavaju.
+
+| Metoda | Putanja | Opis |
+|---|---|---|
+| GET | `/api/auth/csrf/` | `{"csrfToken"}`; CSRF kolačić je HttpOnly, pa se token dobija ovdje |
+| GET | `/api/auth/me/` | `{"authenticated", "user": {id, email, firstName, lastName, roles}}` |
+| POST | `/api/auth/login/` | `{"email", "password"}` → podaci korisnika i **novi** `csrfToken` |
+| POST | `/api/auth/logout/` | 204, sesija se briše |
+| POST | `/api/auth/register/` | `{"email", "firstName", "lastName", "phone", "password", "passwordConfirm"}` → 201 |
+
+Prijava i registracija koriste iste forme i isti backend kao HTML stranice (zaključavanje naloga,
+generička poruka greške, validatori lozinke, audit log, isti odgovor za postojeći email).
 
 ## Demo nalozi
 
