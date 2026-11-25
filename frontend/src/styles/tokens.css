@@ -1,0 +1,50 @@
+/* Dizajn tokeni - JEDINO mjesto s bojama. Bez gradijenata (vidi SKILL.md). */
+:root {
+  --font-sans: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, 'SFMono-Regular', monospace;
+
+  --paper: #f4f5f2;       /* pozadina */
+  --paper-2: #eceee9;     /* paneli */
+  --surface: #ffffff;     /* kartice, polja */
+  --ink: #0d0f10;         /* tekst */
+  --ink-2: #4a5156;       /* sekundarni tekst */
+  --ink-3: #8a9095;       /* oznake, pomoćni tekst */
+  --line: #d9dcd6;        /* tanke linije */
+  --line-strong: #b9beb7;
+  --accent: #2b59ff;      /* ledeno plava - jedini akcent */
+  --accent-ink: #ffffff;
+  --accent-soft: #e3e9ff;
+  --danger: #d23a1f;
+  --danger-soft: #fbe7e2;
+  --ok: #17885a;
+  --ok-soft: #dff3ea;
+  --warn: #b26b00;
+
+  --radius: 8px;
+  --radius-sm: 6px;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dur: 220ms;
+  --header-h: 64px;
+  --content: 1120px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #0b0d0e;
+    --paper-2: #121517;
+    --surface: #15191b;
+    --ink: #eceee9;
+    --ink-2: #a5abaf;
+    --ink-3: #6d7479;
+    --line: #23292c;
+    --line-strong: #353d41;
+    --accent: #7b9bff;
+    --accent-ink: #0b0d0e;
+    --accent-soft: #1a2240;
+    --danger: #ff7a5c;
+    --danger-soft: #2e1712;
+    --ok: #4fd29a;
+    --ok-soft: #0f2a1e;
+    --warn: #f0a63a;
+  }
+}

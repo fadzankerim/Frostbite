@@ -15,6 +15,7 @@ Planinarska društva objavljuju ture, upravljaju vodičima i članovima. Planina
 - [Lokalno pokretanje](#lokalno-pokretanje)
 - [Pokretanje u Dockeru](#pokretanje-u-dockeru)
 - [JSON API](#json-api)
+- [Frontend (React)](#frontend-react)
 - [Demo nalozi](#demo-nalozi)
 - [Testovi](#testovi)
 - [Postavljanje na AWS](#postavljanje-na-aws)
@@ -166,6 +167,30 @@ osim endpointa koji to izričito dozvoljavaju.
 
 Prijava i registracija koriste iste forme i isti backend kao HTML stranice (zaključavanje naloga,
 generička poruka greške, validatori lozinke, audit log, isti odgovor za postojeći email).
+
+## Frontend (React)
+
+Nova verzija interfejsa je u `frontend/` (React 19, TypeScript, Vite, React Router, TanStack Query).
+Za vrijeme migracije živi pod **`/novo/`**, a stare Django stranice ostaju na svojim adresama;
+obje dijele istu sesiju. Pravila dizajna i sigurnosti su u `.claude/skills/frostbite-frontend/SKILL.md`.
+
+Lokalni razvoj (dva terminala):
+
+```bash
+cd app && .venv/bin/python manage.py runserver        # Django na :8000
+cd frontend && npm ci && npm run dev                   # React na http://localhost:5173/novo/
+```
+
+Vite prosljeđuje `/api` i stare stranice na Django, pa sve radi na istom originu (kolačići i CSRF bez CORS-a).
+
+| Komanda | Šta radi |
+|---|---|
+| `npm run check` | TypeScript, ESLint (sigurnosna pravila) i provjera dizajna (bez gradijenata, boje samo iz tokena) |
+| `npm test` | unit testovi (open redirect zaštita, sesija, jačina lozinke) |
+| `npm run build` | `check` + produkcijski build bez source mapa |
+
+U Dockeru se frontend gradi u Nginx image-u (`npm ci`, pa `npm run build`); build pada ako `check` ne prođe.
+Nove pakete instalirati samo u verzijama starijim od 14 dana: `npm install --before=YYYY-MM-DD <paket>`.
 
 ## Demo nalozi
 

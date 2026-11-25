@@ -1,0 +1,17 @@
+# Build context za docker/nginx/Dockerfile je korijen repozitorija.
+.git
+**/node_modules
+**/dist
+**/.venv
+**/__pycache__
+**/*.pyc
+**/*.sqlite3
+app/staticfiles
+**/.env
+**/.env.*
+!**/.env.example
+**/*.key
+**/*.crt
+**/*.pem
+certs
+docs
