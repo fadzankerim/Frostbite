@@ -13,6 +13,7 @@ Planinarska društva objavljuju ture, upravljaju vodičima i članovima. Planina
 - [Tehnologije](#tehnologije)
 - [Struktura projekta](#struktura-projekta)
 - [Lokalno pokretanje](#lokalno-pokretanje)
+- [Pokretanje u Dockeru](#pokretanje-u-dockeru)
 - [Demo nalozi](#demo-nalozi)
 - [Testovi](#testovi)
 - [Postavljanje na AWS](#postavljanje-na-aws)
@@ -112,6 +113,39 @@ rm dev.sqlite3
 ```bash
 .venv/bin/python manage.py create_system_admin
 ```
+
+## Pokretanje u Dockeru
+
+Potrebno: Docker sa Compose pluginom. Aplikacija radi u produkcijskom režimu (PostgreSQL, HTTPS, `__Host-` kolačići).
+
+```bash
+cp .env.example .env          # upišite DJANGO_SECRET_KEY i DB_PASSWORD
+docker compose up -d --build
+docker compose exec backend python manage.py create_system_admin
+```
+
+Aplikacija je na `https://localhost` (samopotpisani certifikat, pregledač će tražiti potvrdu).
+
+| Servis | Uloga | Izložen |
+|---|---|---|
+| `web` | Nginx: TLS, sigurnosna zaglavlja, CSP, rate limit, statičke datoteke | 80, 443 |
+| `backend` | Django + Gunicorn, ne-root korisnik, datotečni sistem samo za čitanje | ne |
+| `db` | PostgreSQL 18 na internoj mreži bez izlaza na internet | ne |
+
+Backend pri svakom pokretanju izvrši `check --deploy`, migracije i `clearsessions`.
+Pravi certifikat: stavite `fullchain.crt` i `privkey.key` u `./certs` i u `docker-compose.yml`
+zamijenite volume `certs` sa `./certs:/etc/nginx/certs:ro`.
+
+Korisne komande:
+
+```bash
+docker compose logs -f backend                    # logovi
+docker compose exec backend python manage.py shell
+docker compose down                               # zaustavljanje (podaci ostaju)
+docker compose down -v                            # zaustavljanje i BRISANJE baze
+```
+
+`seed_demo` ne radi u Dockeru jer odbija PostgreSQL bazu. Demo podaci su samo za lokalni razvoj.
 
 ## Demo nalozi
 
