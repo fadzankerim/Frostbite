@@ -14,6 +14,7 @@ Planinarska društva objavljuju ture, upravljaju vodičima i članovima. Planina
 - [Struktura projekta](#struktura-projekta)
 - [Lokalno pokretanje](#lokalno-pokretanje)
 - [Pokretanje u Dockeru](#pokretanje-u-dockeru)
+- [JSON API](#json-api)
 - [Demo nalozi](#demo-nalozi)
 - [Testovi](#testovi)
 - [Postavljanje na AWS](#postavljanje-na-aws)
@@ -146,6 +147,25 @@ docker compose down -v                            # zaustavljanje i BRISANJE baz
 ```
 
 `seed_demo` ne radi u Dockeru jer odbija PostgreSQL bazu. Demo podaci su samo za lokalni razvoj.
+
+## JSON API
+
+API za React frontend je pod `/api/` (Django REST Framework). Autentikacija je ista kao za
+HTML stranice: Django sesija u `HttpOnly` kolačiću, bez JWT-a i bez tokena u pregledaču.
+Svaki zahtjev koji mijenja stanje mora imati zaglavlje `X-CSRFToken`, i za neprijavljene
+korisnike (zaštita od login CSRF-a). API prima i vraća samo JSON, i ništa nije dozvoljeno bez prijave
+osim endpointa koji to izričito dozvoljavaju.
+
+| Metoda | Putanja | Opis |
+|---|---|---|
+| GET | `/api/auth/csrf/` | `{"csrfToken"}`; CSRF kolačić je HttpOnly, pa se token dobija ovdje |
+| GET | `/api/auth/me/` | `{"authenticated", "user": {id, email, firstName, lastName, roles}}` |
+| POST | `/api/auth/login/` | `{"email", "password"}` → podaci korisnika i **novi** `csrfToken` |
+| POST | `/api/auth/logout/` | 204, sesija se briše |
+| POST | `/api/auth/register/` | `{"email", "firstName", "lastName", "phone", "password", "passwordConfirm"}` → 201 |
+
+Prijava i registracija koriste iste forme i isti backend kao HTML stranice (zaključavanje naloga,
+generička poruka greške, validatori lozinke, audit log, isti odgovor za postojeći email).
 
 ## Demo nalozi
 

@@ -10,5 +10,6 @@ urlpatterns = [
     path('', include('tours.urls')),
     path('', include('clubs.urls')),
     path('nalog/', include('accounts.urls')),
+    path('api/auth/', include('accounts.api_urls')),
     path('', include('panel.urls')),
 ]

@@ -202,7 +202,7 @@ server {
         expires 1h;
     }
 
-    location ~ ^/nalog/(prijava|registracija)/ {
+    location ~ ^/(nalog/(prijava|registracija)|api/auth/(login|register))/ {
         limit_req zone=fb_auth burst=20 nodelay;
         include /etc/nginx/fb-proxy.conf;
     }
