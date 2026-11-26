@@ -1,7 +1,7 @@
 // Prikaz bedževa: mreža s napretkom (profil) i modal "novi bedž" s konfetama i Frostijem.
 import { useEffect, useRef, useState } from 'react';
 
-import { useMarkBadgesSeen, useMyBadges, type MyBadge } from '../api/badges';
+import { useBadgeCatalog, useMarkBadgesSeen, useMyBadges, type MyBadge } from '../api/badges';
 import { formatDate, formatNumber, plural } from '../lib/format';
 import { groupByRole, progressRatio, ROLE_TITLES, TIER_LABELS, unseen } from '../lib/badges';
 import { BadgeArt } from './BadgeArt';
@@ -39,7 +39,7 @@ export function MyBadgesSection() {
   const badges = useMyBadges();
   const earned = badges.data?.filter((b) => b.earned).length ?? 0;
   return (
-    <section className="badges-section" aria-labelledby="badges-title">
+    <section className="badges-section" id="bedzevi" aria-labelledby="badges-title">
       <div className="badges-head">
         <h2 id="badges-title">Bedževi</h2>
         {badges.data && <span className="label-mono">Osvojeno {earned} / {badges.data.length}</span>}
@@ -104,5 +104,32 @@ export function BadgeNotifier() {
         <button type="button" className="btn" onClick={close} autoFocus>Super!</button>
       </div>
     </dialog>
+  );
+}
+
+/** Javna galerija bedževa koje je moguće osvojiti (početna stranica). */
+export function BadgeGallery() {
+  const catalog = useBadgeCatalog();
+  if (catalog.isPending) return <div className="skeleton skeleton-sm" />;
+  if (catalog.isError) return <Notice kind="error">Bedževe nije moguće učitati.</Notice>;
+  return (
+    <>
+      {groupByRole(catalog.data.results).map((g) => (
+        <div key={g.role} className="badge-gallery-group">
+          <h3>{ROLE_TITLES[g.role]}</h3>
+          <ul className="badge-gallery">
+            {g.badges.map((b) => (
+              <li key={b.code}>
+                <BadgeArt icon={b.icon} tier={b.tier} role={b.role} size={56} />
+                <div>
+                  <strong>{b.name}</strong>
+                  <span className="muted">{b.description}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </>
   );
 }

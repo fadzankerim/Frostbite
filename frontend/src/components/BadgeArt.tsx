@@ -20,7 +20,21 @@ const ICONS: Record<string, string[]> = {
   tent: ['M20 41 L32 22 L44 41 Z', 'M28 41 L32 33 L36 41'],
   shield: ['M32 21 L42 25 V32 Q42 39 32 43 Q22 39 22 32 V25 Z', 'M27 32 L31 36 L37 29'],
   eye: ['M20 32 Q32 20 44 32 Q32 44 20 32 Z', 'M32 28 A4 4 0 1 1 31.99 28'],
+  check: ['M24 23 H40 V43 H24 Z', 'M29 20 H35 V25 H29 Z', 'M28 34 L31 37 L37 30'],
+  route: ['M23 40 Q23 32 31 32 Q39 32 39 26', 'M23 38 A2 2 0 1 1 22.99 38', 'M41 22 L41 28 M41 22 L46 24 L41 26'],
+  chart: ['M21 42 H43', 'M25 42 V34', 'M31 42 V28', 'M37 42 V23'],
 };
+
+/** Samo crtež ikone (bez obruba bedža), npr. za korake na početnoj. Ukrasna. */
+export function Glyph({ icon, size = 48, className }: { icon: string; size?: number; className?: string }) {
+  const paths = ICONS[icon] ?? ICONS.peak!;
+  return (
+    <svg className={`glyph${className ? ` ${className}` : ''}`} width={size} height={size} viewBox="16 16 32 32"
+      aria-hidden="true" focusable="false">
+      {paths.map((d) => <path key={d} d={d} />)}
+    </svg>
+  );
+}
 
 const ROLE_CLASS: Record<BadgeRole, string> = {
   PLANINAR: 'ba-hiker', VODIC: 'ba-guide', ADMIN_DRUSTVA: 'ba-club', SISTEM: 'ba-system',

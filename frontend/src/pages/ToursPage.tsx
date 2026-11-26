@@ -4,9 +4,9 @@ import { useNavigate, useSearchParams } from 'react-router';
 import { cleanFilters, useFilterOptions, useTours, type TourFilters } from '../api/public';
 import { Notice } from '../components/forms';
 import { Frosti } from '../components/Frosti';
-import { MapView, type Pin } from '../components/MapView';
+import { MapView, tourPins } from '../components/MapView';
 import { TourCard } from '../components/TourCard';
-import { formatDateTime, plural, spotsText } from '../lib/format';
+import { plural } from '../lib/format';
 import './pages.css';
 
 export function ToursPage() {
@@ -50,11 +50,7 @@ export function ToursPage() {
   }
 
   const list = useMemo(() => tours.data ?? [], [tours.data]);
-  const pins: Pin[] = useMemo(() => list.filter((t) => t.start).map((t) => ({
-    id: t.id, lat: t.start![0], lng: t.start![1], title: t.name, club: t.club.name,
-    when: formatDateTime(t.startAt), difficulty: t.difficulty.code, difficultyLabel: t.difficulty.label,
-    spots: spotsText(t.freeSpots, t.maxParticipants),
-  })), [list]);
+  const pins = useMemo(() => tourPins(list), [list]);
   const withoutRoute = list.length - pins.length;
   const filtered = Object.keys(filters).length > 0;
 

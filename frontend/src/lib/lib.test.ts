@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { MyBadge } from '../api/badges';
 import { groupByRole, progressRatio, tierPoints, unseen } from './badges';
+import { cycle, keyToIndex } from './nav';
 import { passwordStrength } from './passwordStrength';
 import { safeNext } from './safeNext';
 import { formatClock, secondsLeft } from './session';
@@ -160,5 +161,20 @@ describe('bedževi', () => {
     expect(tierPoints(1, 0, 0, 10)).toBeNull();
     expect(tierPoints(2, 0, 0, 10)?.split(' ')).toHaveLength(6);
     expect(tierPoints(3, 0, 0, 10)?.split(' ')).toHaveLength(24);
+  });
+});
+
+describe('navigacija koraka', () => {
+  it('kružno pomjeranje', () => {
+    expect(cycle(3, 1, 4)).toBe(0);
+    expect(cycle(0, -1, 4)).toBe(3);
+    expect(cycle(1, 1, 0)).toBe(0);
+  });
+  it('tipke', () => {
+    expect(keyToIndex('ArrowRight', 2, 3)).toBe(0);
+    expect(keyToIndex('ArrowLeft', 0, 3)).toBe(2);
+    expect(keyToIndex('Home', 2, 3)).toBe(0);
+    expect(keyToIndex('End', 0, 3)).toBe(2);
+    expect(keyToIndex('a', 0, 3)).toBeNull();
   });
 });

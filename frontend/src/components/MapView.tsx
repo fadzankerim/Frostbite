@@ -9,7 +9,8 @@ import './map.css';
 import L from 'leaflet';
 import { useEffect, useRef } from 'react';
 
-import type { DifficultyCode, LatLng } from '../api/public';
+import type { DifficultyCode, LatLng, TourSummary } from '../api/public';
+import { formatDateTime, spotsText } from '../lib/format';
 import { clearDash } from '../lib/svg';
 
 export type Pin = {
@@ -23,6 +24,15 @@ export type Pin = {
   difficultyLabel: string;
   spots: string;
 };
+
+/** Pinovi za ture koje imaju početnu tačku rute. */
+export function tourPins(list: TourSummary[]): Pin[] {
+  return list.filter((t) => t.start).map((t) => ({
+    id: t.id, lat: t.start![0], lng: t.start![1], title: t.name, club: t.club.name,
+    when: formatDateTime(t.startAt), difficulty: t.difficulty.code, difficultyLabel: t.difficulty.label,
+    spots: spotsText(t.freeSpots, t.maxParticipants),
+  }));
+}
 
 type Props = {
   label: string;

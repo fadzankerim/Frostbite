@@ -56,3 +56,19 @@
 @keyframes ba-wiggle { 0% { transform: scale(0.7) rotate(-8deg); } 60% { transform: scale(1.08) rotate(4deg); } 100% { transform: none; } }
 @keyframes ba-fade { from { opacity: 0; } }
 @keyframes ba-pop { from { opacity: 0; transform: scale(0.92) translateY(8px); } to { opacity: 1; transform: none; } }
+
+.glyph path { fill: none; stroke: var(--fun-ink); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* --- galerija bedževa (početna) ------------------------------------------ */
+.badge-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; list-style: none; padding: 0; margin: 0; }
+.badge-gallery li {
+  display: grid; grid-template-columns: 56px 1fr; gap: 12px; align-items: center; padding: 10px 12px;
+  border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface);
+  transition: transform 300ms var(--ease-bounce), border-color var(--dur) var(--ease), box-shadow 300ms var(--ease-bounce);
+}
+.badge-gallery li:hover { transform: translate(-2px, -2px); border-color: var(--fun-ink); box-shadow: 3px 3px 0 var(--fun-ink); }
+.badge-gallery li:hover .badge-art { animation: ba-wiggle 400ms var(--ease-bounce); }
+.badge-gallery strong { display: block; font-size: 0.92rem; }
+.badge-gallery .muted { font-size: 0.8rem; line-height: 1.35; }
+.badge-gallery-group + .badge-gallery-group { margin-top: 18px; }
+.badge-gallery-group h3 { font-size: 0.95rem; margin-bottom: 10px; display: flex; gap: 8px; align-items: center; }
