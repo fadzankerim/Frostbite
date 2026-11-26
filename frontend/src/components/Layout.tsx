@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router';
 
-import { displayName, useLogout, useMe } from '../api/auth';
+import { displayName, useLogout, useMe, type User } from '../api/auth';
+import { useSelection } from '../api/hiker';
 import { SessionIndicator } from './SessionIndicator';
+import { ThemeToggle } from './ThemeToggle';
 import './layout.css';
 
 export function Logo() {
@@ -17,6 +19,63 @@ export function Logo() {
 /** Stare Django stranice (još nisu prebačene u React) - običan link, puno učitavanje stranice. */
 function Legacy({ href, children }: { href: string; children: string }) {
   return <a className="nav-link" href={href}>{children}</a>;
+}
+
+function initialsOf(user: User): string {
+  return ((user.firstName[0] ?? '') + (user.lastName[0] ?? '')).toUpperCase() || (user.email[0] ?? '?').toUpperCase();
+}
+
+/** Meni korisnika: profil, prijave, članstva, odjava. Zatvara se klikom van, Escape-om i promjenom stranice. */
+function UserMenu({ user, onLogout, pending }: { user: User; onLogout: () => void; pending: boolean }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const location = useLocation();
+  const [lastPath, setLastPath] = useState(location.pathname);
+  if (lastPath !== location.pathname) {
+    setLastPath(location.pathname);
+    setOpen(false);
+  }
+
+  useEffect(() => {
+    if (!open) return;
+    const onDown = (e: MouseEvent) => { if (!ref.current?.contains(e.target as Node)) setOpen(false); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  const hiker = !user.roles.systemAdmin;
+  return (
+    <div className="user-menu" ref={ref}>
+      <button type="button" className="user-btn" aria-expanded={open} aria-haspopup="true" aria-controls="user-menu-list"
+        onClick={() => setOpen((o) => !o)}>
+        <span className="avatar sticker mono" aria-hidden="true">{initialsOf(user)}</span>
+        <span className="nav-user">{displayName(user)}</span>
+        <span className="caret" aria-hidden="true">▾</span>
+      </button>
+      <div id="user-menu-list" className={`user-dropdown${open ? ' is-open' : ''}`}>
+        <NavLink to="/profil" className="menu-item">Profil</NavLink>
+        {hiker && <NavLink to="/moje-prijave" className="menu-item">Moje prijave</NavLink>}
+        {hiker && <NavLink to="/moja-clanstva" className="menu-item">Moja članstva</NavLink>}
+        <button type="button" className="menu-item menu-logout" onClick={onLogout} disabled={pending}>Odjava</button>
+      </div>
+    </div>
+  );
+}
+
+function SelectionLink() {
+  const { data } = useSelection();
+  const n = data?.ids.length ?? 0;
+  if (!n) return null;
+  return (
+    <NavLink to="/odabir" className="nav-link nav-selection">
+      Odabir <span className="count-badge mono" aria-label={`${n} odabranih tura`}>{n}</span>
+    </NavLink>
+  );
 }
 
 function Header() {
@@ -54,6 +113,8 @@ function Header() {
           <span className="brand-tag label-mono">Beta</span>
         </Link>
 
+        <div className="header-tools"><ThemeToggle /></div>
+
         <button
           type="button"
           className="menu-toggle"
@@ -69,18 +130,16 @@ function Header() {
           <div className="nav-group">
             <NavLink to="/ture" className="nav-link">Ture</NavLink>
             <NavLink to="/drustva" className="nav-link">Društva</NavLink>
-            {user?.roles.guide && <Legacy href="/vodic/">Vođenje</Legacy>}
+            {user?.roles.guide && <NavLink to="/vodic" className="nav-link">Vođenje</NavLink>}
             {user?.roles.clubAdmin && <Legacy href="/upravljanje/">Upravljanje</Legacy>}
             {user?.roles.systemAdmin && <Legacy href="/sistem/">Sistem</Legacy>}
+            {!user?.roles.systemAdmin && <SelectionLink />}
           </div>
           <div className="nav-group">
             {user ? (
               <>
                 <SessionIndicator />
-                <NavLink to="/profil" className="nav-link nav-user">{displayName(user)}</NavLink>
-                <button type="button" className="btn btn-ghost btn-sm" onClick={onLogout} disabled={logout.isPending}>
-                  Odjava
-                </button>
+                <UserMenu user={user} onLogout={onLogout} pending={logout.isPending} />
               </>
             ) : (
               <>

@@ -13,5 +13,8 @@ urlpatterns = [
     path('api/auth/', include('accounts.api_urls')),
     path('api/tours/', include('tours.api_urls')),
     path('api/clubs/', include('clubs.api_urls')),
+    path('api/selection/', include('tours.api_selection_urls')),
+    path('api/me/', include('accounts.api_me_urls')),
+    path('api/guide/', include('panel.api_guide_urls')),
     path('', include('panel.urls')),
 ]

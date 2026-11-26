@@ -5,6 +5,7 @@ import { useLogin, useRegister } from '../api/auth';
 import { ApiError } from '../api/client';
 import { BJELASNICA, ContourField } from '../components/ContourField';
 import { Field, Notice, PasswordInput, SubmitButton } from '../components/forms';
+import { Frosti } from '../components/Frosti';
 import './pages.css';
 
 function stateNotice(state: unknown): string | null {
@@ -29,7 +30,10 @@ function AuthShell({ eyebrow, title, lead, children }: { eyebrow: string; title:
             <span className="label-mono"><span className="live-dot" /> Topo · 1:25 000</span>
             <span className="label-mono">{BJELASNICA.lat}° N · {BJELASNICA.lon}° E</span>
           </div>
-          <div className="frame-map"><ContourField className="cf-panel" seed={11} center={[300, 300]} /></div>
+          <div className="frame-map">
+            <ContourField className="cf-panel" seed={11} center={[300, 300]} />
+            <div className="peek-frosti"><Frosti mood="wave" size={110} /></div>
+          </div>
           <div className="frame-bar">
             <span className="label-mono">Veza šifrovana · TLS</span>
             <span className="label-mono">Pomjerite kursor</span>

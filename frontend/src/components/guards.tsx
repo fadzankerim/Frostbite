@@ -57,3 +57,13 @@ export function GuestOnly({ children }: { children: ReactNode }) {
   if (data?.authenticated) return <Navigate to={safeNext(params.get('next'))} replace />;
   return children;
 }
+
+/** Funkcionalnosti planinara: prijavljen korisnik koji nije sistemski admin (server isto provjerava). */
+export function RequireHiker({ children }: { children: ReactNode }) {
+  const { data } = useMe();
+  return (
+    <RequireAuth>
+      {data?.authenticated && !data.user.roles.systemAdmin ? children : <Navigate to="/zabranjeno" replace />}
+    </RequireAuth>
+  );
+}

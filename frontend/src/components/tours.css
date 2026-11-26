@@ -6,6 +6,9 @@
   color: var(--diff);
 }
 .diff-dot { width: 7px; height: 7px; border-radius: 2px; background: var(--diff); transform: rotate(45deg); }
+.diff-peaks { width: 28px; height: 8px; }
+.diff-peaks path { fill: var(--line-strong); transition: fill var(--dur) var(--ease); }
+.diff-peaks path.on { fill: var(--diff); }
 .diff-laka { --diff: var(--d-easy); }
 .diff-srednja { --diff: var(--d-medium); }
 .diff-teska { --diff: var(--d-hard); }
@@ -15,25 +18,34 @@
 
 .tour-card { animation: rise 380ms var(--ease) both; }
 .tour-card-link {
-  display: grid; grid-template-columns: 56px 1fr 120px; gap: 18px; align-items: center;
-  padding: 18px; border: 1px solid var(--line); border-radius: var(--radius);
+  display: grid; grid-template-columns: 168px 1fr 112px; gap: 18px; align-items: center;
+  padding: 10px 16px 10px 10px; border: 1px solid var(--line); border-radius: calc(var(--radius) + 4px);
   background: var(--surface);
-  transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease);
+  transition: border-color var(--dur) var(--ease), transform 300ms var(--ease-bounce), box-shadow 300ms var(--ease-bounce);
 }
-.tour-card-link:hover { border-color: var(--ink); transform: translateY(-2px); }
-.tour-card-date {
-  display: grid; justify-items: center; align-content: center; gap: 2px;
-  height: 64px; border-right: 1px solid var(--line); padding-right: 14px;
+.tour-card-link:hover { border-color: var(--fun-ink); transform: translate(-2px, -3px); box-shadow: 4px 5px 0 var(--fun-ink); }
+.tour-card-art { position: relative; height: 112px; border-radius: var(--radius); overflow: hidden; border: 1.5px solid var(--fun-ink); }
+
+/* naljepnica: papir, crni obris, puna pomjerena sjena, blago nakrivljena */
+.sticker {
+  background: var(--fun-paper); color: var(--ink);
+  border: 1.5px solid var(--fun-ink); border-radius: 8px; box-shadow: 2px 2px 0 var(--fun-ink);
 }
-.tour-card-day { font-size: 1.6rem; font-weight: 500; line-height: 1; letter-spacing: -0.03em; }
-.tour-card-date .label-mono { font-size: 0.62rem; }
+.date-sticker {
+  position: absolute; left: 8px; top: 8px;
+  display: grid; justify-items: center; gap: 1px; padding: 5px 8px 4px;
+  transform: rotate(-5deg); transition: transform 300ms var(--ease-bounce);
+}
+.tour-card-link:hover .date-sticker { transform: rotate(3deg) scale(1.08); }
+.tour-card-day { font-size: 1.3rem; font-weight: 600; line-height: 1; letter-spacing: -0.03em; }
+.date-sticker .label-mono { font-size: 0.58rem; color: var(--fun-coral); }
 .tour-card-body { display: grid; gap: 6px; min-width: 0; }
 .tour-card-top { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 .tour-card-title { font-size: 1.08rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tour-card-meta { font-size: 0.88rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .tour-card-stats { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.76rem; color: var(--ink-2); margin: 2px 0; }
 
-.trace { width: 120px; height: 64px; border-left: 1px solid var(--line); padding-left: 10px; overflow: visible; }
+.trace { width: 112px; height: 64px; border-left: 1px dashed var(--line-strong); padding-left: 10px; overflow: visible; }
 .trace-line {
   fill: none; stroke: var(--ink-3); stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round;
   stroke-dasharray: 1; stroke-dashoffset: 1;
@@ -48,14 +60,16 @@
 .spots { display: flex; align-items: center; gap: 10px; }
 .spots-bar { flex: 1; max-width: 160px; height: 3px; background: var(--line); border-radius: 2px; overflow: hidden; }
 .spots-bar span {
-  display: block; height: 100%; background: var(--ink); transform-origin: left;
+  display: block; height: 100%; background: var(--fun-mint); transform-origin: left;
   transition: transform 600ms var(--ease);
 }
 .spots-bar span.full { background: var(--warn); }
 .spots-text { font-size: 0.78rem; color: var(--ink-2); }
 
 @media (max-width: 640px) {
-  .tour-card-link { grid-template-columns: 48px 1fr; }
+  .tour-card-link { grid-template-columns: 1fr; padding: 10px; }
+  .tour-card-art { height: 120px; }
+  .tour-card-body { padding: 0 6px 6px; }
   .trace { display: none; }
 }
 

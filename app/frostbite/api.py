@@ -6,6 +6,7 @@ naloga i promjena lozinke odmah poništavaju postojeće sesije.
 CSRF pravila su u frostbite.authentication.
 """
 from django.utils.cache import add_never_cache_headers
+from rest_framework.permissions import BasePermission
 from rest_framework.views import APIView
 
 
@@ -21,3 +22,13 @@ class ApiView(APIView):
 def form_errors(form):
     """Greške Django forme u JSON obliku: {"polje": ["poruka", ...], "__all__": [...]}."""
     return {field: [e['message'] for e in errs] for field, errs in form.errors.get_json_data().items()}
+
+
+class IsHiker(BasePermission):
+    """Funkcionalnosti planinara (F09-F14): prijavljen korisnik koji NIJE sistemski admin.
+    Isto pravilo kao accounts.permissions.hiker_required za HTML stranice."""
+    message = 'Ova radnja nije dozvoljena.'
+
+    def has_permission(self, request, view):
+        u = request.user
+        return bool(u and u.is_authenticated and not u.is_system_admin)

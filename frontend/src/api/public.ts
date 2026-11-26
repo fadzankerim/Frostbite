@@ -32,7 +32,8 @@ export type TourDetail = TourSummary & {
   requiredEquipment: string;
   route: LatLng[];
   guides: string[];
-  myRegistration: { status: 'PRIJAVLJEN' | 'NA_LISTI_CEKANJA'; label: string } | null;
+  myRegistration: { id: number; status: 'PRIJAVLJEN' | 'NA_LISTI_CEKANJA'; label: string } | null;
+  inSelection: boolean;
   canRegister: boolean;
 };
 
@@ -45,7 +46,8 @@ export type ClubDetail = ClubSummary & {
   email: string;
   phone: string;
   tours: TourSummary[];
-  membership: { status: string; label: string; validUntil: string | null } | null;
+  membership: { status: string; label: string; validUntil: string | null; expired: boolean } | null;
+  canRequest: boolean;
 };
 
 const FILTER_KEYS = ['q', 'difficulty', 'club', 'date_from', 'date_to'] as const;

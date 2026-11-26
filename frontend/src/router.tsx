@@ -1,9 +1,11 @@
 import { createBrowserRouter } from 'react-router';
 
-import { GuestOnly, RequireAuth } from './components/guards';
+import { GuestOnly, RequireAuth, RequireHiker, RequireRole } from './components/guards';
 import { Layout } from './components/Layout';
 import { LoginPage, RegisterPage } from './pages/AuthPages';
 import { ClubDetailPage, ClubsPage } from './pages/ClubPages';
+import { GuideDashboardPage, GuideTourPage } from './pages/GuidePages';
+import { MyMembershipsPage, MyRegistrationsPage, SelectionPage } from './pages/HikerPages';
 import { HomePage } from './pages/HomePage';
 import { ProfilePage } from './pages/ProfilePage';
 import { ErrorPage, ForbiddenPage, NotFoundPage } from './pages/StatusPages';
@@ -26,6 +28,11 @@ export const router = createBrowserRouter(
         { path: 'prijava', element: <GuestOnly><LoginPage /></GuestOnly> },
         { path: 'registracija', element: <GuestOnly><RegisterPage /></GuestOnly> },
         { path: 'profil', element: <RequireAuth><ProfilePage /></RequireAuth> },
+        { path: 'odabir', element: <SelectionPage /> },
+        { path: 'moje-prijave', element: <RequireHiker><MyRegistrationsPage /></RequireHiker> },
+        { path: 'moja-clanstva', element: <RequireHiker><MyMembershipsPage /></RequireHiker> },
+        { path: 'vodic', element: <RequireRole role="guide"><GuideDashboardPage /></RequireRole> },
+        { path: 'vodic/ture/:id', element: <RequireRole role="guide"><GuideTourPage /></RequireRole> },
         { path: 'zabranjeno', element: <ForbiddenPage /> },
         { path: '*', element: <NotFoundPage /> },
       ],

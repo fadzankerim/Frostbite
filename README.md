@@ -169,6 +169,22 @@ osim endpointa koji to izričito dozvoljavaju.
 | GET | `/api/tours/filters/` | težine i odobrena društva za filtere |
 | GET | `/api/tours/stats/` | zbirne brojke za početnu |
 | GET | `/api/clubs/`, `/api/clubs/<id>/` | odobrena društva, javni profil i njihove ture |
+| POST | `/api/tours/<id>/register/` | prijava na turu (puna tura → lista čekanja) · planinar |
+| GET | `/api/me/registrations/` | vlastite prijave (predstojeće sa `canCancel`, historija) · planinar |
+| POST | `/api/me/registrations/<id>/cancel/` | odjava do roka; prvi sa liste čekanja dobija mjesto · planinar |
+| GET, POST | `/api/selection/` | odabir više tura (sesija, dijeli se sa starim stranicama); POST `{"tourId"}` |
+| DELETE | `/api/selection/<id>/` | ukloni turu iz odabira |
+| POST | `/api/selection/confirm/` | prijava na sve odabrane ture, rezultat po turi · planinar |
+| POST | `/api/clubs/<id>/membership/` | zahtjev za članstvo · planinar |
+| GET | `/api/me/memberships/` | vlastita članstva i zahtjevi · planinar |
+| GET, PUT | `/api/me/profile/` | vlastiti profil (email, uloge i status se ne mogu mijenjati) |
+| POST | `/api/me/password/` | promjena lozinke uz staru; ostale sesije se odjavljuju |
+| GET | `/api/guide/` | ture koje vodič vodi i ture vlastitih društava bez vodiča · vodič |
+| GET | `/api/guide/tours/<id>/` | učesnici sa ličnim podacima (samo odobreni vodič, do 7 dana nakon ture; pristup se bilježi) |
+| POST | `/api/guide/tours/<id>/apply/` · `close/` · `attendance/` · `report/` | prijava za vođenje, zatvaranje prijava, prisustvo `{"present": [id]}`, izvještaj `{"text"}` |
+
+"Planinar" znači prijavljen korisnik koji nije sistemski admin (isto pravilo kao `hiker_required`).
+Pravila prijave, odjave i liste čekanja su u `tours/services.py` i ista su za stare i nove stranice.
 
 Javni endpointi (`tours`, `clubs`) koriste iste upite kao HTML stranice (`public_tours()`, `approved_clubs()`):
 samo objavljene ture odobrenih društava u narednih 30 dana; sve ostalo je 404. Odgovori sadrže samo
@@ -191,6 +207,9 @@ cd frontend && npm ci && npm run dev                   # React na http://localho
 ```
 
 Vite prosljeđuje `/api` i stare stranice na Django, pa sve radi na istom originu (kolačići i CSRF bez CORS-a).
+
+Interfejs ima svijetlu i tamnu temu (prekidač u zaglavlju; bez izbora prati sistem), maskotu Frosti
+i generisane crtane ilustracije planina na karticama tura i društava (`SceneArt`, isti crtež za isti ID).
 
 | Komanda | Šta radi |
 |---|---|
