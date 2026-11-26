@@ -5,6 +5,10 @@ import { Layout } from './components/Layout';
 import { LoginPage, RegisterPage } from './pages/AuthPages';
 import { ClubDetailPage, ClubsPage } from './pages/ClubPages';
 import { GuideDashboardPage, GuideTourPage } from './pages/GuidePages';
+import {
+  ManageDashboardTab, ManageGuidesTab, ManageIndexPage, ManageLayout, ManageMembersTab, ManageProfileTab,
+  ManageTourCreate, ManageTourDetail, ManageTourEdit, ManageToursTab,
+} from './pages/ManagePages';
 import { MyMembershipsPage, MyRegistrationsPage, SelectionPage } from './pages/HikerPages';
 import { HomePage } from './pages/HomePage';
 import { ProfilePage } from './pages/ProfilePage';
@@ -33,6 +37,21 @@ export const router = createBrowserRouter(
         { path: 'moja-clanstva', element: <RequireHiker><MyMembershipsPage /></RequireHiker> },
         { path: 'vodic', element: <RequireRole role="guide"><GuideDashboardPage /></RequireRole> },
         { path: 'vodic/ture/:id', element: <RequireRole role="guide"><GuideTourPage /></RequireRole> },
+        { path: 'upravljanje', element: <RequireRole role="clubAdmin"><ManageIndexPage /></RequireRole> },
+        {
+          path: 'upravljanje/:clubId',
+          element: <RequireRole role="clubAdmin"><ManageLayout /></RequireRole>,
+          children: [
+            { index: true, element: <ManageDashboardTab /> },
+            { path: 'ture', element: <ManageToursTab /> },
+            { path: 'ture/nova', element: <ManageTourCreate /> },
+            { path: 'ture/:tourId', element: <ManageTourDetail /> },
+            { path: 'ture/:tourId/uredi', element: <ManageTourEdit /> },
+            { path: 'vodici', element: <ManageGuidesTab /> },
+            { path: 'clanovi', element: <ManageMembersTab /> },
+            { path: 'profil', element: <ManageProfileTab /> },
+          ],
+        },
         { path: 'zabranjeno', element: <ForbiddenPage /> },
         { path: '*', element: <NotFoundPage /> },
       ],

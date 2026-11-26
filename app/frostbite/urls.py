@@ -16,5 +16,6 @@ urlpatterns = [
     path('api/selection/', include('tours.api_selection_urls')),
     path('api/me/', include('accounts.api_me_urls')),
     path('api/guide/', include('panel.api_guide_urls')),
+    path('api/manage/', include('panel.api_club_urls')),
     path('', include('panel.urls')),
 ]

@@ -182,6 +182,18 @@ osim endpointa koji to izričito dozvoljavaju.
 | GET | `/api/guide/` | ture koje vodič vodi i ture vlastitih društava bez vodiča · vodič |
 | GET | `/api/guide/tours/<id>/` | učesnici sa ličnim podacima (samo odobreni vodič, do 7 dana nakon ture; pristup se bilježi) |
 | POST | `/api/guide/tours/<id>/apply/` · `close/` · `attendance/` · `report/` | prijava za vođenje, zatvaranje prijava, prisustvo `{"present": [id]}`, izvještaj `{"text"}` |
+| GET | `/api/manage/` | društva kojima korisnik upravlja · admin društva |
+| GET | `/api/manage/<c>/` | analitika društva (faze, popunjenost, procjena prihoda, serije po mjesecu) |
+| GET, POST | `/api/manage/<c>/tours/` | ture društva; kreiranje (uvijek NACRT; ruta kao lista `[lat, lng]`, najviše 500 tačaka) |
+| GET, PUT | `/api/manage/<c>/tours/<id>/` | detalji (prijave samo imenom i statusom) i izmjena (samo nacrt/objavljena/zatvorena) |
+| POST | `/api/manage/<c>/tours/<id>/transition/` · `guides/assign/` · `guides/<app>/decide/` | objava/zatvaranje/otkazivanje, dodjela i odobravanje vodiča |
+| GET, POST | `/api/manage/<c>/guides/` · `guides/<id>/remove/` | vodiči društva (dodavanje po emailu - ista poruka bez obzira na nalog) |
+| GET, POST | `/api/manage/<c>/members/` · `members/<id>/decide/` | zahtjevi za članstvo i aktivni članovi |
+| GET, PUT | `/api/manage/<c>/profile/` | profil društva (naziv i status mijenja samo sistemski admin) |
+
+""Admin društva" vidi samo društva kojima upravlja: tuđe društvo, tura, vodič ili članstvo daju 404
+(i preko URL-a vlastitog društva). Pravila su u `panel/club_service.py` i `panel/guide_service.py`,
+zajednička za stare stranice i API.
 
 "Planinar" znači prijavljen korisnik koji nije sistemski admin (isto pravilo kao `hiker_required`).
 Pravila prijave, odjave i liste čekanja su u `tours/services.py` i ista su za stare i nove stranice.
