@@ -155,7 +155,7 @@ export function TourDetailPage() {
                 <CopyButton text={coords} />
                 {directions && <a className="btn btn-ghost btn-sm" href={directions} target="_blank" rel="noopener noreferrer">Navigacija ↗</a>}
                 {gmaps && <a className="btn btn-ghost btn-sm" href={gmaps} target="_blank" rel="noopener noreferrer">Google mape ↗</a>}
-                <a className="btn btn-ghost btn-sm" href={`/ture/${t.id}/ruta.gpx`} download>GPX</a>
+                <a className="btn btn-ghost btn-sm" href={`/api/tours/${t.id}/gpx/`} download>GPX</a>
               </div>
             </section>
           )}

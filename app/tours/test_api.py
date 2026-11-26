@@ -1,4 +1,4 @@
-"""Javni API tura i društava: ista pravila vidljivosti kao HTML stranice (politika 4.4)."""
+"""Javni API tura i društava: pravila vidljivosti (politika 4.4)."""
 import json
 from datetime import timedelta
 

@@ -1,6 +1,6 @@
 """Pravila admina društva (F18, F21-F28; politika 4.3 ograničenje 2).
 
-Zajednička logika za HTML panel (views_club) i JSON API (api_club). Svaka funkcija dobija
+Koristi ga JSON API (api_club). Svaka funkcija dobija
 `club` koji je već provjeren kroz admin_clubs(user), i svaki objekat se traži UNUTAR tog
 društva - tuđe ture, vodiči i članstva daju 404 (Http404), isto kao nepostojeći.
 Radnje koje nisu dozvoljene u trenutnom stanju bacaju ClubError sa porukom za korisnika.

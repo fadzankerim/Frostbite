@@ -1,5 +1,0 @@
-{% load ui %}{% if page.has_other_pages %}<nav class="pager">
-  {% if page.has_previous %}<a class="btn btn-ghost btn-sm" href="?{% if request.GET.q %}q={{ request.GET.q|urlencode }}&{% endif %}{% if request.GET.action %}action={{ request.GET.action|urlencode }}&{% endif %}page={{ page.previous_page_number }}">{% icon 'arrow-left' %}Prethodna</a>{% endif %}
-  <span class="meta">Strana {{ page.number }} od {{ page.paginator.num_pages }}</span>
-  {% if page.has_next %}<a class="btn btn-ghost btn-sm" href="?{% if request.GET.q %}q={{ request.GET.q|urlencode }}&{% endif %}{% if request.GET.action %}action={{ request.GET.action|urlencode }}&{% endif %}page={{ page.next_page_number }}">Sljedeća{% icon 'chevron-right' %}</a>{% endif %}
-</nav>{% endif %}

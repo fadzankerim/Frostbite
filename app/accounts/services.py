@@ -1,9 +1,11 @@
-"""Poslovna logika naloga, zajednička za HTML stranice i API."""
+"""Poslovna logika naloga (registracija)."""
 from django.db import IntegrityError, transaction
 
 from audit.log import audit
 
 from .models import User
+
+REGISTER_DONE_MSG = 'Registracija je završena. Prijavite se svojim emailom i lozinkom.'
 
 
 def register_hiker(request, data):

@@ -4,6 +4,7 @@ import { GuestOnly, RequireAuth, RequireHiker, RequireRole } from './components/
 import { Layout } from './components/Layout';
 import { LoginPage, RegisterPage } from './pages/AuthPages';
 import { ClubDetailPage, ClubsPage } from './pages/ClubPages';
+import { ClubRequestPage } from './pages/ClubRequestPage';
 import { GuideDashboardPage, GuideTourPage } from './pages/GuidePages';
 import {
   ManageDashboardTab, ManageGuidesTab, ManageIndexPage, ManageLayout, ManageMembersTab, ManageProfileTab,
@@ -17,7 +18,6 @@ import { ErrorPage, ForbiddenPage, NotFoundPage } from './pages/StatusPages';
 import { TourDetailPage } from './pages/TourDetailPage';
 import { ToursPage } from './pages/ToursPage';
 
-// Rute su relativne na /novo/ (vite.config.ts: base). Stare Django stranice su obični linkovi.
 export const router = createBrowserRouter(
   [
     {
@@ -29,6 +29,7 @@ export const router = createBrowserRouter(
         { path: 'ture', element: <ToursPage /> },
         { path: 'ture/:id', element: <TourDetailPage /> },
         { path: 'drustva', element: <ClubsPage /> },
+        { path: 'drustva/novo', element: <RequireHiker><ClubRequestPage /></RequireHiker> },
         { path: 'drustva/:id', element: <ClubDetailPage /> },
         { path: 'prijava', element: <GuestOnly><LoginPage /></GuestOnly> },
         { path: 'registracija', element: <GuestOnly><RegisterPage /></GuestOnly> },
@@ -68,5 +69,4 @@ export const router = createBrowserRouter(
       ],
     },
   ],
-  { basename: import.meta.env.BASE_URL.replace(/\/$/, '') },
 );

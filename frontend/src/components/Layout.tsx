@@ -161,7 +161,7 @@ export function Layout() {
       <footer className="site-footer">
         <div className="container footer-inner">
           <span className="label-mono">Frostbite · 43.8563° N 18.4131° E · Sarajevo</span>
-          <a className="label-mono footer-link" href="/">Klasični prikaz</a>
+          <span className="label-mono">Planinarske ture · Bosna i Hercegovina</span>
         </div>
       </footer>
     </>

@@ -75,7 +75,7 @@ function popupContent(pin: Pin, onOpen?: (id: number) => void): HTMLElement {
   box.appendChild(el('span', 'pop-club', pin.club));
   box.appendChild(el('span', 'pop-spots', pin.spots));
   const a = el('a', 'pop-link', 'Detalji ture →');
-  a.href = `${import.meta.env.BASE_URL}ture/${Number(pin.id)}`;
+  a.href = `/ture/${Number(pin.id)}`;
   a.addEventListener('click', (e) => {
     if (!onOpen || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
     e.preventDefault();

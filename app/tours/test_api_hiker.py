@@ -173,11 +173,6 @@ class SelectionApiTests(Api):
         self.assertEqual(r.status_code, 400)
         self.assertEqual(len(self.call(a, 'get', 'api_selection:list').json()['ids']), 10)
 
-    def test_selection_shared_with_html_pages(self):
-        a = self.client_for(self.ana)
-        self.call(a, 'post', 'api_selection:list', data={'tourId': self.t2.pk})
-        self.assertContains(a.get(reverse('tours:selection')), 'Tura 2')
-
 
 class MembershipApiTests(Api):
     def test_request_once_and_list(self):

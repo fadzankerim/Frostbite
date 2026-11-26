@@ -1,4 +1,4 @@
-"""API panela vodiča: ista pravila kao HTML panel (ograničenja 1 i 2, politika 4.5)."""
+"""API panela vodiča: ograničenja 1 i 2, politika 4.5."""
 import json
 from datetime import timedelta
 
@@ -10,7 +10,7 @@ from audit.models import AuditLog
 from clubs.models import ClubGuide
 from tours.models import Tour, TourGuide, TourRegistration
 
-from .tests import Base
+from .test_base import Base
 
 
 class GuideApiTests(Base):

@@ -38,8 +38,6 @@ INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
     'rest_framework',
     'accounts',
     'clubs',
@@ -55,25 +53,19 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
 ROOT_URLCONF = 'frostbite.urls'
 
+# Bez HTML predložaka: Django služi samo JSON API. (Prazna konfiguracija ostaje jer je
+# koriste ugrađene greške i DRF.)
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [],
         'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-                'accounts.context_processors.roles',
-            ],
-        },
+        'OPTIONS': {'context_processors': []},
     },
 ]
 
@@ -103,9 +95,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # --- Autentikacija ---------------------------------------------------------
 AUTH_USER_MODEL = 'accounts.User'
 AUTHENTICATION_BACKENDS = ['accounts.backends.LockoutEmailBackend']
-LOGIN_URL = 'accounts:login'
-LOGIN_REDIRECT_URL = 'home'
-LOGOUT_REDIRECT_URL = 'home'
 
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -168,11 +157,6 @@ LANGUAGES = [('bs', 'Bosanski')]
 TIME_ZONE = 'Europe/Sarajevo'
 USE_I18N = True
 USE_TZ = True
-
-# --- Statičke datoteke -----------------------------------------------------
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'static']
-STATIC_ROOT = Path(env('DJANGO_STATIC_ROOT', BASE_DIR / 'staticfiles'))
 
 # --- Logovanje -------------------------------------------------------------
 LOG_DIR = env('DJANGO_LOG_DIR')

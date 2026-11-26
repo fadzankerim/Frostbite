@@ -96,13 +96,3 @@ class ReportForm(forms.ModelForm):
         model = TourReport
         fields = ['text']
         widgets = {'text': forms.Textarea(attrs={'rows': 6, 'maxlength': 4000})}
-
-
-class UserSearchForm(forms.Form):
-    q = forms.CharField(label='Pretraga', max_length=100, required=False,
-                        widget=forms.TextInput(attrs={'placeholder': 'Ime, prezime ili email'}))
-
-
-class AuditFilterForm(forms.Form):
-    action = forms.CharField(label='Akcija', max_length=50, required=False,
-                             widget=forms.TextInput(attrs={'placeholder': 'npr. LOGIN_NEUSPJEH'}))

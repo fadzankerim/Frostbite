@@ -1,18 +1,20 @@
 #!/usr/bin/env bash
-# Frostbite - postavljanje / ažuriranje Django aplikacije.
-#   sudo ./04-deploy-app.sh <izvorni-folder> <privatna-IP-ove-instance>
+# Frostbite - postavljanje / ažuriranje aplikacije (Django API + React interfejs).
+#   sudo ./04-deploy-app.sh <izvorni-folder> <privatna-IP-ove-instance> <react-build-folder>
 # Obično se ne pokreće ručno, nego preko infra/deploy.sh sa vašeg računara.
 #
 # Raspored na serveru:
 #   /opt/frostbite/app     kod (vlasnik root, aplikacija ga može samo čitati)
 #   /opt/frostbite/venv    Python okruženje (root)
-#   /opt/frostbite/static  statičke datoteke (servira ih Nginx)
+#   /opt/frostbite/web     React aplikacija (build iz frontend/; servira je Nginx)
 #   /etc/frostbite/*.env   tajne (root:frostbite 640)
 #   /run/frostbite.sock    Gunicorn socket (dostupan samo korisniku www-data, tj. Nginx-u)
 set -euo pipefail
 
-SRC="${1:?Upotreba: sudo $0 <izvorni-folder> <privatna-IP>}"
-APP_IP="${2:?Upotreba: sudo $0 <izvorni-folder> <privatna-IP>}"
+USAGE="Upotreba: sudo $0 <izvorni-folder> <privatna-IP> <react-build-folder>"
+SRC="${1:?$USAGE}"
+APP_IP="${2:?$USAGE}"
+WEB="${3:?$USAGE}"
 APP_USER=frostbite
 BASE=/opt/frostbite
 ENV_DIR=/etc/frostbite
@@ -27,12 +29,13 @@ id "$APP_USER" >/dev/null 2>&1 || { echo "[!] Prvo pokrenite 01-osnova.sh"; exit
 [[ -f $ENV_DIR/db.env ]] || { echo "[!] Prvo pokrenite 02-postgresql.sh"; exit 1; }
 [[ -f $CERT ]] || { echo "[!] Prvo pokrenite 03-nginx-https.sh"; exit 1; }
 [[ -f $SRC/manage.py ]] || { echo "[!] $SRC ne sadrži Django projekat (manage.py)."; exit 1; }
+[[ -f $WEB/index.html ]] || { echo "[!] $WEB ne sadrži React build (index.html)."; exit 1; }
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get install -y -qq python3-venv rsync >/dev/null
 
 # --- Kod -------------------------------------------------------------------
-# 751: Nginx (www-data) smije samo proći kroz folder do static/, ne i čitati sadržaj
+# 751: Nginx (www-data) smije samo proći kroz folder do web/, ne i čitati sadržaj
 install -d -o root -g "$APP_USER" -m 751 "$BASE"
 install -d -o root -g "$APP_USER" -m 750 "$BASE/app"
 rsync -a --delete --exclude '.venv' --exclude '__pycache__' --exclude '*.pyc' \
@@ -57,7 +60,6 @@ if [[ ! -f $ENV_DIR/app.env ]]; then
 FROSTBITE_ENV=production
 DJANGO_SECRET_KEY=$(openssl rand -base64 64 | tr -d '\n=+/' | head -c 64)
 DJANGO_ALLOWED_HOSTS=$APP_IP
-DJANGO_STATIC_ROOT=$BASE/static
 DJANGO_LOG_DIR=/var/log/frostbite
 EOF
   chown root:"$APP_USER" "$ENV_DIR/app.env"; chmod 640 "$ENV_DIR/app.env"
@@ -74,16 +76,17 @@ cd $BASE/app && exec runuser -u $APP_USER -- $BASE/venv/bin/python manage.py "\$
 EOF
 chmod 750 /usr/local/sbin/frostbite-manage
 
-install -d -o root -g www-data -m 750 "$BASE/static"
+# React aplikacija: vlasnik root, Nginx (www-data) je smije samo čitati
+install -d -o root -g www-data -m 750 "$BASE/web"
+rsync -a --delete "$WEB/" "$BASE/web/"
+chown -R root:www-data "$BASE/web"; find "$BASE/web" -type d -exec chmod 750 {} +; find "$BASE/web" -type f -exec chmod 640 {} +
+rm -rf "$BASE/static"          # ostatak starih Django stranica (više se ne koristi)
 install -d -o "$APP_USER" -g "$APP_USER" -m 750 /var/log/frostbite
 
-# --- Baza i statičke datoteke ----------------------------------------------
+# --- Baza -------------------------------------------------------------------
 frostbite-manage check --deploy --fail-level ERROR
 frostbite-manage migrate --noinput
-set -a; . "$ENV_DIR/db.env"; . "$ENV_DIR/app.env"; set +a
-# kao root, ali bez log datoteke (inače bi django.log bio vlasništvo roota)
-(cd "$BASE/app" && DJANGO_LOG_DIR= PYTHONDONTWRITEBYTECODE=1 "$BASE/venv/bin/python" manage.py collectstatic --noinput --clear -v 0)
-chown -R root:www-data "$BASE/static"; find "$BASE/static" -type d -exec chmod 750 {} +; find "$BASE/static" -type f -exec chmod 640 {} +
+frostbite-manage clearsessions
 
 # --- systemd: socket + servis ----------------------------------------------
 cat > /etc/systemd/system/frostbite.socket <<'EOF'
@@ -195,20 +198,33 @@ server {
     error_log  /var/log/nginx/fb-error.log;
 
     location ~ /\. { deny all; return 404; }
+    root $BASE/web;
 
-    location /static/ {
-        alias $BASE/static/;
-        access_log off;
-        expires 1h;
-    }
-
-    location ~ ^/(nalog/(prijava|registracija|lozinka)|api/auth/(login|register)|api/me/password)/ {
+    # --- JSON API (Django) -----------------------------------------------------
+    location ~ ^/api/(auth/(login|register)|me/password)/\$ {
         limit_req zone=fb_auth burst=20 nodelay;
         include /etc/nginx/fb-proxy.conf;
     }
-
-    location / {
+    location /api/ {
         include /etc/nginx/fb-proxy.conf;
+    }
+
+    # --- stare adrese (Django stranice i /novo/ iz perioda migracije) -> nove -----
+    location ~ ^/novo/?(.*)\$ { return 301 /\$1\$is_args\$args; }
+    location ~ ^/nalog/prijava/?\$ { return 301 /prijava\$is_args\$args; }
+    location ~ ^/nalog/registracija/?\$ { return 301 /registracija; }
+    location ~ ^/nalog/(profil|lozinka)/?\$ { return 301 /profil; }
+    location ~ ^/ture/(\d+)/ruta\.gpx\$ { return 301 /api/tours/\$1/gpx/; }
+
+    # --- React aplikacija ---------------------------------------------------------
+    location /assets/ {
+        access_log off;
+        expires max;                       # imena datoteka sadrže hash sadržaja
+        try_files \$uri =404;
+    }
+    location / {
+        expires -1;                        # index.html se ne kešira
+        try_files \$uri /index.html;       # rute React Routera -> index.html
     }
 }
 EOF
@@ -232,9 +248,10 @@ sleep 2
 echo "[i] Provjera:"
 systemctl is-active frostbite.service
 curl -sk -o /dev/null -w "  Početna:      %{http_code}\n" "https://127.0.0.1/" -H "Host: $APP_IP"
-curl -sk -o /dev/null -w "  Prijava:      %{http_code}\n" "https://127.0.0.1/nalog/prijava/" -H "Host: $APP_IP"
-curl -sk -o /dev/null -w "  CSS:          %{http_code}\n" "https://127.0.0.1/static/css/style.css" -H "Host: $APP_IP"
-curl -sk -o /dev/null -w "  Lažni Host:   %{http_code} (očekivano 400)\n" "https://127.0.0.1/" -H "Host: zlo.example"
+curl -sk -o /dev/null -w "  Ruta (SPA):   %{http_code}\n" "https://127.0.0.1/ture" -H "Host: $APP_IP"
+curl -sk -o /dev/null -w "  API:          %{http_code}\n" "https://127.0.0.1/api/tours/" -H "Host: $APP_IP"
+curl -sk -o /dev/null -w "  Stara adresa: %{http_code} (očekivano 301)\n" "https://127.0.0.1/nalog/prijava/" -H "Host: $APP_IP"
+curl -sk -o /dev/null -w "  Lažni Host:   %{http_code} (očekivano 400)\n" "https://127.0.0.1/api/tours/" -H "Host: zlo.example"
 echo
 echo "[OK] Aplikacija je postavljena: https://$APP_IP"
 echo "     Sistemski admin (samo prvi put): sudo frostbite-manage create_system_admin"

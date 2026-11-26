@@ -1,7 +1,6 @@
 """Pravila za vodiče (F15-F20; politika 4.3 ograničenja 1 i 2, politika 4.5).
 
-Zajednička logika za HTML panel (views_guide) i JSON API (api_guide): jedno mjesto za
-pravila, transakcije i audit. Funkcije bacaju Http404 za ture koje korisnik ne smije vidjeti
+Jedno mjesto za pravila, transakcije i audit; koristi ga JSON API (api_guide). Funkcije bacaju Http404 za ture koje korisnik ne smije vidjeti
 (isto kao nepostojeće) i GuideError za radnje koje nisu dozvoljene u trenutnom stanju.
 """
 from datetime import timedelta

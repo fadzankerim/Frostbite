@@ -10,10 +10,11 @@ from rest_framework.response import Response
 from audit.log import audit
 from frostbite.api import ApiView, IsHiker
 from tours.api import tour_summary
-from tours.views import public_tours
+from tours.queries import public_tours
 
 from .models import Club, ClubMembership
-from .views import approved_clubs
+from . import services
+from .queries import approved_clubs
 
 
 def club_summary(club, tours_count):
@@ -98,3 +99,23 @@ class MyMembershipsView(ApiView):
             {**_membership_payload(m), 'club': {'id': m.club_id, 'name': m.club.name, 'city': m.club.city,
                                                  'public': m.club.status == Club.Status.APPROVED}}
             for m in items]})
+
+
+class ClubRequestView(ApiView):
+    """F09 - zahtjev za registraciju društva (planinar). GET kaže da li je novi zahtjev moguć."""
+    permission_classes = [IsHiker]
+
+    def get(self, request):
+        return Response({'canRequest': not services.has_pending_request(request.user)})
+
+    def post(self, request):
+        d = request.data if isinstance(request.data, dict) else {}
+        data = {f: d.get(f) if isinstance(d.get(f), str) else '' for f in ['name', 'city', 'description', 'email', 'phone']}
+        try:
+            club = services.request_club(request._request, data)
+        except services.ClubRequestError as e:
+            body = {'detail': str(e)}
+            if e.errors:
+                body['errors'] = e.errors
+            return Response(body, status=400)
+        return Response({'id': club.pk, 'detail': 'Zahtjev je poslan. Društvo postaje vidljivo nakon odobrenja.'}, status=201)

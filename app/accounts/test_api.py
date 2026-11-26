@@ -12,7 +12,7 @@ from clubs.models import Club
 
 from .forms import GENERIC_LOGIN_ERROR
 from .models import User
-from .views import REGISTER_DONE_MSG
+from .services import REGISTER_DONE_MSG
 
 PW = 'Snijeg-Na-Bjelasnici-42'
 
@@ -119,6 +119,15 @@ class LoginApiTests(ApiClientMixin, TestCase):
         r = self.login()
         self.assertEqual(r.json(), {'detail': GENERIC_LOGIN_ERROR})
         self.assertFalse(self.me()['authenticated'])
+
+    def test_success_resets_counter(self):
+        for _ in range(3):
+            self.login('pogresna-lozinka-123')
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.failed_login_count, 3)
+        self.login()
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.failed_login_count, 0)
 
     def test_lock_expires(self):
         User.objects.filter(pk=self.user.pk).update(locked_until=timezone.now() - timedelta(seconds=1))
