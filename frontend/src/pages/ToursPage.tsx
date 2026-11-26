@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router';
 
 import { cleanFilters, useFilterOptions, useTours, type TourFilters } from '../api/public';
 import { Notice } from '../components/forms';
+import { Frosti } from '../components/Frosti';
 import { MapView, type Pin } from '../components/MapView';
 import { TourCard } from '../components/TourCard';
 import { formatDateTime, plural, spotsText } from '../lib/format';
@@ -112,6 +113,7 @@ export function ToursPage() {
           {tours.isPending && Array.from({ length: 4 }, (_, i) => <div key={i} className="skeleton" />)}
           {!tours.isPending && list.length === 0 && !tours.isError && (
             <div className="empty">
+              <Frosti mood="think" size={96} />
               <span className="label-mono">Nema rezultata</span>
               <p className="muted">{filtered ? 'Nijedna tura ne odgovara filterima.' : 'Trenutno nema objavljenih tura u narednih 30 dana.'}</p>
             </div>

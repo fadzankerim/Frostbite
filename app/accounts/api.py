@@ -10,7 +10,7 @@ Tok u pregledaču:
   3. GET  /api/auth/me/        -> ko je prijavljen (ili authenticated: false)
   4. POST /api/auth/logout/    -> 204
 """
-from django.contrib.auth import login, logout
+from django.contrib.auth import login, logout, update_session_auth_hash
 from django.middleware.csrf import get_token
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.utils.decorators import method_decorator
@@ -18,9 +18,10 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
+from audit.log import audit
 from frostbite.api import ApiView, form_errors
 
-from .forms import LoginForm, RegistrationForm
+from .forms import BosnianPasswordChangeForm, LoginForm, ProfileForm, RegistrationForm
 from .permissions import is_club_admin, is_guide
 from .services import register_hiker
 from .views import REGISTER_DONE_MSG
@@ -116,3 +117,56 @@ _FIELD_NAMES = {'first_name': 'firstName', 'last_name': 'lastName',
 
 def _api_field_names(errors):
     return {_FIELD_NAMES.get(k, k): v for k, v in errors.items()}
+
+
+# --- Profil i lozinka (F07, F08) -------------------------------------------------
+_PROFILE_FIELDS = {  # API ime -> polje modela (ProfileForm određuje šta se smije mijenjati)
+    'firstName': 'first_name', 'lastName': 'last_name', 'phone': 'phone',
+    'emergencyContactName': 'emergency_contact_name', 'emergencyContactPhone': 'emergency_contact_phone',
+    'healthNotes': 'health_notes',
+}
+
+
+def _profile_payload(user):
+    return {'email': user.email, **{api: getattr(user, field) for api, field in _PROFILE_FIELDS.items()}}
+
+
+class ProfileView(ApiView):
+    """F07 - vlastiti profil. Email, uloge i status se ne mogu mijenjati (nisu dio ProfileForm).
+    Zdravstvene napomene vidi samo korisnik i vodič ture na koju je prijavljen."""
+
+    def get(self, request):
+        return Response(_profile_payload(request.user))
+
+    def put(self, request):
+        d = request.data if isinstance(request.data, dict) else {}
+        data = {field: d.get(api, '') if isinstance(d.get(api, ''), str) else '' for api, field in _PROFILE_FIELDS.items()}
+        form = ProfileForm(data, instance=request.user)
+        if not form.is_valid():
+            inv = {v: k for k, v in _PROFILE_FIELDS.items()}
+            return Response({'errors': {inv.get(k, k): v for k, v in form_errors(form).items()}},
+                            status=status.HTTP_400_BAD_REQUEST)
+        form.save()
+        audit(request._request, 'PROFIL_IZMJENA', 'user', request.user.pk)
+        return Response({**_profile_payload(request.user), 'detail': 'Profil je sačuvan.'})
+
+
+class PasswordChangeView(ApiView):
+    """F08 - promjena lozinke uz staru lozinku. Ostale sesije korisnika postaju nevažeće,
+    trenutna ostaje (update_session_auth_hash)."""
+
+    def post(self, request):
+        d = request.data if isinstance(request.data, dict) else {}
+        form = BosnianPasswordChangeForm(request.user, data={
+            'old_password': d.get('oldPassword', ''),
+            'new_password1': d.get('newPassword', ''),
+            'new_password2': d.get('newPasswordConfirm', ''),
+        })
+        if not form.is_valid():
+            names = {'old_password': 'oldPassword', 'new_password1': 'newPassword', 'new_password2': 'newPasswordConfirm'}
+            return Response({'errors': {names.get(k, k): v for k, v in form_errors(form).items()}},
+                            status=status.HTTP_400_BAD_REQUEST)
+        user = form.save()
+        update_session_auth_hash(request._request, user)
+        audit(request._request, 'LOZINKA_PROMJENA', 'user', user.pk)
+        return Response({'detail': 'Lozinka je promijenjena.'})

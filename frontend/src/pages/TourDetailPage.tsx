@@ -3,10 +3,14 @@ import { Link, useParams } from 'react-router';
 
 import { useMe } from '../api/auth';
 import { ApiError } from '../api/client';
-import { parseId, useTour } from '../api/public';
+import { useRegisterTour, useSelectionAdd, useSelectionRemove } from '../api/hiker';
+import { parseId, useTour, type TourDetail } from '../api/public';
+import { Confetti } from '../components/Confetti';
+import { Frosti } from '../components/Frosti';
 import { AltitudeTicker } from '../components/AltitudeTicker';
 import { Notice } from '../components/forms';
 import { Loading } from '../components/guards';
+import { SceneArt } from '../components/SceneArt';
 import { MapView } from '../components/MapView';
 import { DifficultyBadge, SpotsBar } from '../components/TourCard';
 import { countdown, formatLong, formatNumber, formatPrice, toDms } from '../lib/format';
@@ -31,11 +35,69 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
+/** Prijava na turu i odabir. Šta je dozvoljeno odlučuje server; ovdje je samo prikaz stanja. */
+function RegisterPanel({ t }: { t: TourDetail }) {
+  const { data: me } = useMe();
+  const register = useRegisterTour(t.id);
+  const add = useSelectionAdd();
+  const remove = useSelectionRemove();
+  const loggedIn = me?.authenticated ?? false;
+  const error = [register.error, add.error, remove.error].find((e) => e instanceof ApiError) as ApiError | undefined;
+  const nextUrl = `/prijava?next=${encodeURIComponent(`/ture/${t.id}`)}`;
+
+  if (register.isSuccess) {
+    const waiting = register.data.status === 'NA_LISTI_CEKANJA';
+    return (
+      <div className="register-done" role="status">
+        {!waiting && <Confetti seed={t.id} />}
+        <Frosti mood={waiting ? 'think' : 'happy'} size={96} />
+        <strong>{waiting ? 'Upisani ste na listu čekanja.' : 'Prijavljeni ste! Vidimo se na stazi.'}</strong>
+        <Link className="btn btn-ghost btn-block" to="/moje-prijave">Moje prijave</Link>
+      </div>
+    );
+  }
+  if (t.myRegistration) {
+    return (
+      <>
+        <Notice kind="ok">{t.myRegistration.status === 'PRIJAVLJEN' ? 'Prijavljeni ste na ovu turu.' : 'Na listi ste čekanja.'}</Notice>
+        <Link className="btn btn-ghost btn-block" to="/moje-prijave">Moje prijave</Link>
+      </>
+    );
+  }
+  if (t.deadlinePassed) return <Notice>Rok za prijavu je istekao.</Notice>;
+  if (!t.canRegister) return null;
+
+  return (
+    <>
+      {error && <Notice kind="error">{error.detail}</Notice>}
+      {loggedIn ? (
+        <button type="button" className="btn btn-accent btn-block" disabled={register.isPending}
+          onClick={() => register.mutate()} aria-busy={register.isPending}>
+          {register.isPending && <span className="spinner" aria-hidden="true" />}
+          {t.freeSpots > 0 ? 'Prijavi se' : 'Upiši me na listu čekanja'}
+          {!register.isPending && <span className="arrow" aria-hidden="true">→</span>}
+        </button>
+      ) : (
+        <Link className="btn btn-accent btn-block" to={nextUrl}>Prijavi se <span className="arrow" aria-hidden="true">→</span></Link>
+      )}
+      {t.inSelection ? (
+        <button type="button" className="btn btn-ghost btn-block" disabled={remove.isPending} onClick={() => remove.mutate(t.id)}>
+          Ukloni iz odabira
+        </button>
+      ) : (
+        <button type="button" className="btn btn-ghost btn-block" disabled={add.isPending} onClick={() => add.mutate(t.id)}>
+          + Dodaj u odabir
+        </button>
+      )}
+      {!loggedIn && <p className="field-hint">Za prijavu je potreban nalog. Ture možete odabrati i prije prijave.</p>}
+    </>
+  );
+}
+
 export function TourDetailPage() {
   const { id } = useParams();
   const tourId = parseId(id);
   const tour = useTour(tourId);
-  const { data: me } = useMe();
 
   if (tourId === null) return <NotFoundPage />;
   if (tour.isPending) return <Loading label="Učitavanje ture" />;
@@ -49,11 +111,11 @@ export function TourDetailPage() {
   const gmaps = start ? `https://www.google.com/maps/search/?api=1&query=${start[0].toFixed(6)},${start[1].toFixed(6)}` : null;
   const directions = start ? `https://www.google.com/maps/dir/?api=1&destination=${start[0].toFixed(6)},${start[1].toFixed(6)}` : null;
   const left = countdown(t.startAt);
-  const legacyUrl = `/ture/${t.id}/`;
 
   return (
     <div className="container detail-page">
       <Link to="/ture" className="back label-mono">← Sve ture</Link>
+      <div className="banner has-scene"><SceneArt seed={t.id} difficulty={t.difficulty.code} width={800} /></div>
 
       <header className="detail-head">
         <div className="detail-badges">
@@ -123,20 +185,7 @@ export function TourDetailPage() {
             </dl>
             <SpotsBar free={t.freeSpots} max={t.maxParticipants} />
 
-            {t.myRegistration ? (
-              <Notice kind="ok">
-                {t.myRegistration.status === 'PRIJAVLJEN' ? 'Prijavljeni ste na ovu turu.' : 'Na listi ste čekanja.'}
-              </Notice>
-            ) : t.deadlinePassed ? (
-              <Notice>Rok za prijavu je istekao.</Notice>
-            ) : t.canRegister ? (
-              <>
-                <a className="btn btn-accent btn-block" href={legacyUrl}>
-                  {t.freeSpots > 0 ? 'Prijavi se' : 'Upiši me na listu čekanja'} <span className="arrow" aria-hidden="true">→</span>
-                </a>
-                {!me?.authenticated && <p className="field-hint">Za prijavu je potreban nalog.</p>}
-              </>
-            ) : null}
+            <RegisterPanel t={t} />
           </div>
         </aside>
       </div>

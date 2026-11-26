@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import type { DifficultyCode, LatLng, TourSummary } from '../api/public';
 import { formatDateTime, formatDay, formatMonth, formatNumber, spotsText } from '../lib/format';
 import { clearDash } from '../lib/svg';
+import { SceneArt } from './SceneArt';
 import './tours.css';
 
 const W = 120;
@@ -24,8 +25,21 @@ export function routeTracePath(trace: LatLng[], w = W, h = H, pad = 6): { d: str
   return { d: pts.map(([x, y], i) => `${i ? 'L' : 'M'}${x.toFixed(1)},${y.toFixed(1)}`).join(''), start: pts[0]! };
 }
 
+const PEAKS: Record<DifficultyCode, number> = { LAKA: 1, SREDNJA: 2, TESKA: 3, VRLO_TESKA: 4 };
+
+/** Težina: broj malih vrhova (1-4) u boji težine + naziv. */
 export function DifficultyBadge({ code, label }: { code: DifficultyCode; label: string }) {
-  return <span className={`diff diff-${code.toLowerCase()}`}><span className="diff-dot" aria-hidden="true" />{label}</span>;
+  const n = PEAKS[code];
+  return (
+    <span className={`diff diff-${code.toLowerCase()}`}>
+      <svg className="diff-peaks" viewBox="0 0 40 10" aria-hidden="true" focusable="false">
+        {[0, 1, 2, 3].map((i) => (
+          <path key={i} className={i < n ? 'on' : ''} d={`M${i * 10} 10 L${i * 10 + 5} 1.5 L${i * 10 + 10} 10 Z`} />
+        ))}
+      </svg>
+      {label}
+    </span>
+  );
 }
 
 export function RouteTrace({ trace }: { trace: LatLng[] }) {
@@ -68,10 +82,13 @@ export function TourCard({ tour, onHover, index = 0 }: Props) {
       onFocus={() => onHover?.(tour.id)}
       onBlur={() => onHover?.(null)}
     >
-      <Link to={`/ture/${tour.id}`} className="tour-card-link">
-        <div className="tour-card-date" aria-hidden="true">
-          <span className="mono tour-card-day">{formatDay(tour.startAt)}</span>
-          <span className="label-mono">{formatMonth(tour.startAt)}</span>
+      <Link to={`/ture/${tour.id}`} className="tour-card-link has-scene">
+        <div className="tour-card-art">
+          <SceneArt seed={tour.id} difficulty={tour.difficulty.code} />
+          <div className="sticker date-sticker" aria-hidden="true">
+            <span className="mono tour-card-day">{formatDay(tour.startAt)}</span>
+            <span className="label-mono">{formatMonth(tour.startAt)}</span>
+          </div>
         </div>
         <div className="tour-card-body">
           <div className="tour-card-top">

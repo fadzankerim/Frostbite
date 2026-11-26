@@ -40,6 +40,11 @@ export default defineConfig(
     },
   },
   {
+    // jedini izuzetak za pohranu u pregledaču: izbor teme ('light' | 'dark')
+    files: ['src/lib/theme.ts'],
+    rules: { 'no-restricted-globals': ['error', 'sessionStorage', 'indexedDB', 'fetch'] },
+  },
+  {
     // jedino mjesto koje smije zvati fetch
     files: ['src/api/client.ts'],
     rules: { 'no-restricted-globals': 'off' },

@@ -12,14 +12,11 @@
   background: var(--paper);
   border-bottom: 1px solid var(--line);
 }
-.header-inner { height: 100%; display: flex; align-items: center; gap: 24px; }
+.header-inner { height: 100%; display: flex; align-items: center; gap: 20px; }
 
 .brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 600; letter-spacing: -0.02em; }
 .brand-name { font-size: 1.05rem; }
-.brand-tag {
-  padding: 2px 6px; border: 1px solid var(--line-strong); border-radius: 4px;
-  font-size: 0.62rem; color: var(--ink-2);
-}
+.brand-tag { padding: 2px 6px; border-radius: 4px; font-size: 0.62rem; }
 .logo { width: 28px; height: 28px; }
 .logo path { fill: var(--ink); }
 .logo .logo-snow { fill: none; stroke: var(--paper); stroke-width: 1.6; stroke-linejoin: round; }
@@ -90,3 +87,84 @@
 .site-footer { border-top: 1px solid var(--line); }
 .footer-inner { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-top: 20px; padding-bottom: 20px; }
 .footer-link:hover { color: var(--ink); }
+
+/* --- Prekidač teme: sunce koje postaje mjesec --------------------------------- */
+.header-tools { order: 3; display: flex; align-items: center; }
+.theme-toggle {
+  width: 38px; height: 38px; display: grid; place-items: center;
+  border: 1.5px solid var(--fun-ink); border-radius: 50%;
+  background: var(--fun-paper); cursor: pointer; box-shadow: 2px 2px 0 var(--fun-ink);
+  transition: transform 300ms var(--ease-bounce), box-shadow 300ms var(--ease-bounce);
+}
+.theme-toggle:hover { transform: translate(-1px, -1px) rotate(-12deg); box-shadow: 3px 3px 0 var(--fun-ink); }
+.theme-toggle:active { transform: translate(1px, 1px); box-shadow: 0 0 0 var(--fun-ink); }
+.theme-toggle svg { width: 24px; height: 24px; overflow: visible; }
+.tt-body { fill: var(--fun-sun); stroke: var(--fun-ink); stroke-width: 1.6; transition: fill 400ms var(--ease); }
+.tt-rays line { stroke: var(--fun-sun); stroke-width: 2.2; stroke-linecap: round; }
+.tt-rays { transform-origin: 16px 16px; transition: transform 500ms var(--ease-bounce), opacity 300ms var(--ease); }
+.tt-bite { fill: var(--fun-paper); transform: translate(10px, -10px); transition: transform 450ms var(--ease-bounce); }
+.tt-stars circle { fill: var(--fun-sun); opacity: 0; transition: opacity 300ms var(--ease) 150ms; }
+.theme-toggle.is-dark .tt-body { fill: var(--fun-sun); }
+.theme-toggle.is-dark .tt-rays { transform: rotate(90deg) scale(0.3); opacity: 0; }
+.theme-toggle.is-dark .tt-bite { transform: translate(0, 0); }
+.theme-toggle.is-dark .tt-stars circle { opacity: 1; }
+
+/* oznaka Beta kao naljepnica */
+.brand-tag {
+  background: var(--fun-sun); color: var(--fun-ink); border: 1.5px solid var(--fun-ink);
+  box-shadow: 1.5px 1.5px 0 var(--fun-ink); transform: rotate(-4deg);
+  transition: transform 300ms var(--ease-bounce);
+}
+.brand:hover .brand-tag { transform: rotate(4deg) scale(1.1); }
+
+.site-nav { order: 2; }
+@media (max-width: 860px) {
+  .header-tools { order: 2; margin-left: auto; }
+  .menu-toggle { order: 3; margin-left: 10px; }
+}
+
+/* --- Meni korisnika ------------------------------------------------------------ */
+.user-menu { position: relative; }
+.user-btn {
+  display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 8px 0 4px;
+  border: 1px solid transparent; border-radius: 999px; background: transparent; color: var(--ink);
+  font: inherit; font-size: 0.93rem; cursor: pointer; transition: border-color var(--dur) var(--ease);
+}
+.user-btn:hover, .user-btn[aria-expanded='true'] { border-color: var(--line-strong); }
+.avatar {
+  display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%;
+  background: var(--fun-lilac); color: var(--fun-ink); font-size: 0.72rem; font-weight: 600;
+  box-shadow: 1.5px 1.5px 0 var(--fun-ink);
+}
+.caret { font-size: 0.7rem; color: var(--ink-3); transition: transform var(--dur) var(--ease); }
+.user-btn[aria-expanded='true'] .caret { transform: rotate(180deg); }
+.user-dropdown {
+  position: absolute; right: 0; top: calc(100% + 8px); min-width: 200px; z-index: 30;
+  display: grid; padding: 6px; background: var(--surface);
+  border: 1.5px solid var(--fun-ink); border-radius: var(--radius); box-shadow: 4px 4px 0 var(--fun-ink);
+  opacity: 0; visibility: hidden; transform: translateY(-6px) scale(0.98); transform-origin: top right;
+  transition: opacity var(--dur) var(--ease), transform 300ms var(--ease-bounce), visibility var(--dur);
+}
+.user-dropdown.is-open { opacity: 1; visibility: visible; transform: none; }
+.menu-item {
+  display: block; width: 100%; padding: 9px 12px; border: 0; border-radius: var(--radius-sm);
+  background: transparent; color: var(--ink); font: inherit; font-size: 0.92rem; text-align: left; cursor: pointer;
+}
+.menu-item:hover, .menu-item.active { background: var(--paper-2); }
+.menu-logout { color: var(--danger); border-top: 1px solid var(--line); border-radius: 0 0 var(--radius-sm) var(--radius-sm); margin-top: 4px; }
+
+.nav-selection { display: inline-flex; align-items: center; gap: 6px; }
+.count-badge {
+  display: grid; place-items: center; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px;
+  background: var(--fun-coral); color: var(--fun-ink); font-size: 0.72rem; font-weight: 600;
+  border: 1.5px solid var(--fun-ink); animation: pop 400ms var(--ease-bounce);
+}
+@keyframes pop { from { transform: scale(0.4); } to { transform: scale(1); } }
+
+@media (max-width: 860px) {
+  .user-menu { width: 100%; }
+  .user-btn { width: 100%; justify-content: flex-start; }
+  .user-dropdown { position: static; box-shadow: none; border: 0; padding: 0 0 0 38px; opacity: 1; visibility: visible; transform: none; display: none; }
+  .user-dropdown.is-open { display: grid; }
+}
+.avatar.sticker { background: var(--fun-lilac); color: var(--fun-ink); }

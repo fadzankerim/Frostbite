@@ -10,35 +10,51 @@ Frontend je React + TypeScript (Vite) u `frontend/`. Backend je Django API pod `
 
 ## Dizajn
 
-**Pravac:** moderan, minimalistički, s malo futurističkih detalja. Puno praznog prostora,
-jasna tipografija, malo boja, a detalji podsjećaju na instrumente (altimetar, GPS, topografska karta).
+**Pravac:** moderan i čist raspored, ali **razigran**: struktura i tipografija ostaju minimalističke,
+a život daju zabavni, crtani (cartoon) detalji: maskota Frosti (mali jeti), generisane ilustracije
+planina na karticama, živahne boje u detaljima i male "bouncy" animacije. Instrumentalni detalji
+(altimetar, GPS, topografska karta) ostaju kao futuristički sloj.
 
 1. **Bez gradijenata, nigdje.** Ni `linear-`, `radial-` ni `conic-gradient`, ni u CSS-u ni u SVG-u
-   (`<linearGradient>`), ni "glow" efekti koji ih imitiraju. Samo pune boje. `npm run check` pada ako nađe "gradient".
+   (`<linearGradient>`), ni "glow" efekti koji ih imitiraju. Samo pune boje (i ilustracije su
+   "flat" - slojevi punih boja). `npm run check` pada ako nađe "gradient".
 2. **Font:** Geist (tekst) i Geist Mono (brojevi, koordinate, visine, oznake). Fontovi su lokalni
    (`@fontsource-variable/*`), nikad sa CDN-a (CSP `default-src 'self'` i privatnost).
-3. **Boje:** isključivo kroz tokene u `src/styles/tokens.css` (`--ink`, `--paper`, `--line`, `--accent`...).
-   Jedan akcent (`--accent`, ledeno plava). Svijetla i tamna tema preko `prefers-color-scheme`.
+3. **Boje:** isključivo kroz tokene u `src/styles/tokens.css`. Osnova je mirna (`--ink`, `--paper`,
+   `--line`), glavni akcent ledeno plava (`--accent`), a **zabavna paleta** (`--fun-coral`, `--fun-sun`,
+   `--fun-mint`, `--fun-lilac`, `--fun-sky`, `--fun-peach`) služi za detalje: naljepnice, brojeve,
+   ikonice, linije, ilustracije. Ne za velike površine teksta. Palete ilustracija su klase `.scene-p*`.
    Nikad hardkodirane boje u komponentama.
-4. **Oblik:** tanke linije (1px `--line`), mali radijusi (`--radius` 6-10px), bez teških sjena.
+   **Tema:** svijetla i tamna, prekidač u zaglavlju (`ThemeToggle`); bez izbora prati sistem.
+   Tokeni se mijenjaju preko `:root[data-theme=dark]` i `@media (prefers-color-scheme: dark)` sa
+   `:root:not([data-theme=light])` - oba moraju ostati usklađena.
+4. **Oblik:** tanke linije (1px `--line`), mali radijusi (`--radius` 6-10px), bez mutnih sjena.
+   Crtani elementi (naljepnice `.sticker`, kartice na hover) smiju imati obris `--fun-ink` i
+   punu, pomjerenu sjenu bez zamućenja (`box-shadow: 3px 3px 0 var(--fun-ink)`).
    Hijerarhija tipografijom i razmakom, ne bojom.
 5. **Animacije na temu aplikacije:** topografske izohipse koje se iscrtavaju (`ContourField`),
    brojač visine (`AltitudeTicker`), "altimetar" koji prati kursor, linije profila rute, puls statusa.
    - Trajanje 150-400ms za UI, sporije (do ~2s) samo za ukrasne crteže.
    - Animirati `transform` i `opacity` (i `stroke-dashoffset` za SVG), ne `width`/`top`.
    - **Obavezno poštovati `prefers-reduced-motion`**: ukrasne animacije se gase, sadržaj ostaje.
-6. **Futuristički detalji (umjereno):** mono oznake u VELIKIM slovima s razmakom (`.label-mono`),
+   - Zabavne animacije: maskota trepće i maše, oblaci plove, zastavica na vrhu se vijori,
+     konfete pri uspješnoj prijavi na turu. Kratke i nenametljive; nikad ne blokiraju rad.
+6. **Crtani elementi:** `Frosti` (maskota) za prazna stanja, greške, prijavu i uspjeh;
+   `SceneArt` generiše ilustraciju iz `seed`-a (ID ture/društva), pa je ista svaki put.
+   Ilustracije su ukrasne (`aria-hidden`), čisti SVG iz koda - bez vanjskih slika.
+7. **Futuristički detalji (umjereno):** mono oznake u VELIKIM slovima s razmakom (`.label-mono`),
    koordinate i visine (npr. `43.7155° N · 18.2565° E · 2067 m`), statusne tačke, tanka mreža,
    indikator sesije. Najviše 1-2 takva detalja po ekranu.
-7. **Interaktivnost:** hover i focus stanja na svemu što je klikabilno; vidljiv `:focus-visible`
+8. **Interaktivnost:** hover i focus stanja na svemu što je klikabilno; vidljiv `:focus-visible`
    prsten (pristupačnost nije opcionalna); stanja učitavanja i greške za svaki zahtjev.
-8. **Responzivno:** radi od 360px širine; mobilno prvo.
-9. **Jezik:** sav tekst na bosanskom (ijekavica), kao postojeće Django stranice.
+9. **Responzivno:** radi od 360px širine; mobilno prvo.
+10. **Jezik:** sav tekst na bosanskom (ijekavica), kao postojeće Django stranice.
 
 ## Sigurnost
 
 1. **Autentikacija samo preko sesije** (HttpOnly kolačić). Nikad JWT, nikad token, lozinka ili
-   lični podaci u `localStorage`/`sessionStorage`/IndexedDB. CSRF token živi samo u memoriji
+   lični podaci u `localStorage`/`sessionStorage`/IndexedDB. Jedini izuzetak je izbor teme
+   (`light`/`dark`) u `src/lib/theme.ts` i `public/theme-init.js` - ništa drugo. CSRF token živi samo u memoriji
    (`src/api/client.ts`) i obnavlja se nakon prijave (server ga mijenja).
 2. **Svi pozivi API-ja idu kroz `api()` iz `src/api/client.ts`**: samo putanje `/api/...`,
    `credentials: 'same-origin'`, `X-CSRFToken` za POST/PUT/PATCH/DELETE, bez keširanja.

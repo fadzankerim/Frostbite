@@ -1,9 +1,10 @@
 import { createBrowserRouter } from 'react-router';
 
-import { GuestOnly, RequireAuth } from './components/guards';
+import { GuestOnly, RequireAuth, RequireHiker } from './components/guards';
 import { Layout } from './components/Layout';
 import { LoginPage, RegisterPage } from './pages/AuthPages';
 import { ClubDetailPage, ClubsPage } from './pages/ClubPages';
+import { MyMembershipsPage, MyRegistrationsPage, SelectionPage } from './pages/HikerPages';
 import { HomePage } from './pages/HomePage';
 import { ProfilePage } from './pages/ProfilePage';
 import { ErrorPage, ForbiddenPage, NotFoundPage } from './pages/StatusPages';
@@ -26,6 +27,9 @@ export const router = createBrowserRouter(
         { path: 'prijava', element: <GuestOnly><LoginPage /></GuestOnly> },
         { path: 'registracija', element: <GuestOnly><RegisterPage /></GuestOnly> },
         { path: 'profil', element: <RequireAuth><ProfilePage /></RequireAuth> },
+        { path: 'odabir', element: <SelectionPage /> },
+        { path: 'moje-prijave', element: <RequireHiker><MyRegistrationsPage /></RequireHiker> },
+        { path: 'moja-clanstva', element: <RequireHiker><MyMembershipsPage /></RequireHiker> },
         { path: 'zabranjeno', element: <ForbiddenPage /> },
         { path: '*', element: <NotFoundPage /> },
       ],

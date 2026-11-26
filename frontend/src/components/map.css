@@ -10,8 +10,9 @@
 }
 .map.leaflet-container { background: var(--paper-2); font: inherit; }
 .map .leaflet-tile-pane { filter: saturate(0.75) contrast(0.95); }
+:root[data-theme='dark'] .map .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) saturate(0.5) brightness(0.85) contrast(0.9); }
 @media (prefers-color-scheme: dark) {
-  .map .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) saturate(0.5) brightness(0.85) contrast(0.9); }
+  :root:not([data-theme='light']) .map .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) saturate(0.5) brightness(0.85) contrast(0.9); }
 }
 
 .map .leaflet-bar { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); box-shadow: none; overflow: hidden; }

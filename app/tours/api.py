@@ -17,7 +17,7 @@ from frostbite.api import ApiView, form_errors
 from . import services
 from .forms import TourSearchForm
 from .models import Tour, TourGuide, TourRegistration
-from .views import public_tours
+from .views import _selection, public_tours
 
 MAX_TRACE_POINTS = 40
 
@@ -118,7 +118,7 @@ class TourDetailView(ApiView):
         if user.is_authenticated:
             reg = TourRegistration.objects.filter(tour=tour, user=user, status__in=services.ACTIVE).first()
             if reg:
-                my_reg = {'status': reg.status, 'label': reg.get_status_display()}
+                my_reg = {'id': reg.pk, 'status': reg.status, 'label': reg.get_status_display()}
         route = tour.route if isinstance(tour.route, list) and len(tour.route) >= 2 else []
         return Response({
             **tour_summary(tour),
@@ -130,6 +130,7 @@ class TourDetailView(ApiView):
             'route': [[float(a), float(b)] for a, b in route],
             'guides': [g.user.get_full_name() for g in guides],    # politika 4.4: samo ime i prezime
             'myRegistration': my_reg,
+            'inSelection': tour.pk in _selection(request._request),
             # sistemski admin se ne prijavljuje na ture (F09-F14); server to ionako provjerava
             'canRegister': not (user.is_authenticated and user.is_system_admin),
         })
