@@ -15,6 +15,9 @@ from django.utils import timezone
 
 from accounts.models import User
 from audit.log import audit
+from badges import rules as badge_events
+from badges.rules import club_admin_users
+from badges.services import notify as notify_badges
 from clubs.models import ClubGuide, ClubMembership
 from tours.models import Tour, TourGuide, TourRegistration
 
@@ -177,6 +180,8 @@ def transition(request, club, pk, action):
         tour.status = new
         tour.save(update_fields=['status', 'updated_at'])
     audit(request, audit_action, 'tour', tour.pk)
+    if action == 'publish':
+        notify_badges(badge_events.PUBLISH, club_admin_users(club))
     return msg
 
 
@@ -264,4 +269,6 @@ def decide_membership(request, club, pk, decision):
         m.decided_by, m.decided_at = request.user, timezone.now()
         m.save(update_fields=['status', 'valid_until', 'decided_by', 'decided_at'])
     audit(request, 'CLANSTVO_ODOBRENO' if decision == 'approve' else 'CLANSTVO_ODBIJENO', 'club_membership', m.pk)
+    if decision == 'approve':
+        notify_badges(badge_events.MEMBERSHIP, [m.user])
     return m

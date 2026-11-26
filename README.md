@@ -192,6 +192,9 @@ osim endpointa koji to izričito dozvoljavaju.
 | GET, POST | `/api/clubs/request/` | zahtjev za registraciju društva (najviše jedan na čekanju) · planinar |
 | GET, PUT | `/api/me/profile/` | vlastiti profil (email, uloge i status se ne mogu mijenjati) |
 | POST | `/api/me/password/` | promjena lozinke uz staru; ostale sesije se odjavljuju |
+| GET | `/api/badges/` | katalog bedževa (javno) i ukupan broj dodijeljenih |
+| GET | `/api/me/badges/` | vlastiti bedževi uloga korisnika: `earned`, `seen`, `progress`/`goal` |
+| POST | `/api/me/badges/seen/` | označi nove bedževe kao viđene |
 | GET | `/api/guide/` | ture koje vodič vodi i ture vlastitih društava bez vodiča · vodič |
 | GET | `/api/guide/tours/<id>/` | učesnici sa ličnim podacima (samo odobreni vodič, do 7 dana nakon ture; pristup se bilježi) |
 | POST | `/api/guide/tours/<id>/apply/` · `close/` · `attendance/` · `report/` | prijava za vođenje, zatvaranje prijava, prisustvo `{"present": [id]}`, izvještaj `{"text"}` |

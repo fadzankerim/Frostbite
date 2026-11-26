@@ -16,6 +16,9 @@ from django.utils import timezone
 
 from accounts.models import User
 from audit.log import audit
+from badges import rules as badge_events
+from badges.rules import club_admin_users
+from badges.services import notify as notify_badges
 from audit.models import AuditLog
 from clubs.models import Club
 
@@ -56,6 +59,8 @@ def decide_club(request, pk, action):
         club.status = new
         club.save(update_fields=['status'])
     audit(request, audit_action, 'club', club.pk)
+    if action in ('approve', 'reject'):
+        notify_badges(badge_events.CLUB_DECISION, [request.user, *club_admin_users(club)])
     return club
 
 

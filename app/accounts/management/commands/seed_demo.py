@@ -5,6 +5,7 @@
 from datetime import timedelta
 
 from django.conf import settings
+from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.utils import timezone
@@ -141,6 +142,7 @@ class Command(BaseCommand):
                 for _ in range(rng.randint(0, 3)):
                     AuditLog.objects.create(action='LOGIN_NEUSPJEH', entity='user', details='demo', created_at=day)
 
+        call_command('badges_backfill', stdout=self.stdout)
         self.stdout.write(self.style.SUCCESS(f'Demo podaci ubačeni. Lozinka za sve naloge: {DEMO_PASSWORD}'))
         for e in ['sysadmin@frostbite.ba', 'admin@pd-bjelasnica.ba', 'admin@pd-prenj.ba', 'vodic1@pd-bjelasnica.ba',
                   'vodic@pd-prenj.ba', 'planinar1@primjer.ba', 'planinar2@primjer.ba']:
