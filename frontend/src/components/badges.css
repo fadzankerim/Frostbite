@@ -1,0 +1,58 @@
+/* Bedževi: crtež (BadgeArt), mreža na profilu i modal "novi bedž". Boje iz tokens.css. */
+.badge-art { display: block; overflow: visible; }
+.badge-art .ba-stroke { stroke: var(--fun-ink); stroke-width: 2; stroke-linejoin: round; }
+.ba-tier-1 .ba-rim { fill: var(--badge-bronze); }
+.ba-tier-2 .ba-rim { fill: var(--badge-silver); }
+.ba-tier-3 .ba-rim { fill: var(--badge-gold); }
+.ba-ribbon { fill: var(--fun-coral); }
+.ba-hiker .ba-disc { fill: var(--badge-hiker); }
+.ba-guide .ba-disc { fill: var(--badge-guide); }
+.ba-club .ba-disc { fill: var(--badge-club); }
+.ba-system .ba-disc { fill: var(--badge-system); }
+.ba-icon path { fill: none; stroke: var(--fun-ink); stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+.ba-shine { fill: none; stroke: var(--fun-paper); stroke-width: 2.4; stroke-linecap: round; opacity: 0.8; }
+
+.badge-art.is-locked .ba-rim, .badge-art.is-locked .ba-disc, .badge-art.is-locked .ba-ribbon { fill: var(--badge-locked); }
+.badge-art.is-locked .ba-stroke, .badge-art.is-locked .ba-icon path { stroke: var(--badge-locked-ink); }
+
+/* --- mreža bedževa ------------------------------------------------------- */
+.badges-section { margin-top: 28px; }
+.badges-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.badges-group { margin-top: 18px; }
+.badges-group h3 { font-size: 0.95rem; margin-bottom: 10px; }
+.badge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; list-style: none; padding: 0; margin: 0; }
+.badge-card {
+  display: grid; justify-items: center; gap: 6px; text-align: center; padding: 14px 12px;
+  border: 1px solid var(--line); border-radius: calc(var(--radius) + 2px); background: var(--surface);
+  transition: transform var(--dur) var(--ease-bounce), box-shadow var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.badge-card.is-earned:hover { transform: translateY(-3px) rotate(-1deg); border-color: var(--fun-ink); box-shadow: 3px 3px 0 var(--fun-ink); }
+.badge-card.is-earned:hover .badge-art { animation: ba-wiggle 400ms var(--ease-bounce); }
+.badge-card strong { font-size: 0.92rem; }
+.badge-card .muted { font-size: 0.8rem; line-height: 1.35; }
+.badge-card.is-locked strong { color: var(--ink-2); }
+.badge-meta { font-size: 0.62rem; }
+
+.badge-progress { width: 100%; display: grid; gap: 4px; margin-top: 2px; }
+.badge-track { height: 6px; border-radius: 999px; background: var(--paper-2); border: 1px solid var(--line); overflow: hidden; }
+.badge-fill { display: block; height: 100%; background: var(--accent); transform-origin: left; transition: transform 400ms var(--ease); }
+
+/* --- modal "novi bedž" ---------------------------------------------------- */
+.badge-dialog {
+  border: 1.5px solid var(--fun-ink); border-radius: calc(var(--radius) + 6px); box-shadow: 5px 5px 0 var(--fun-ink);
+  background: var(--surface); color: var(--ink); padding: 24px; width: min(420px, calc(100vw - 32px));
+}
+.badge-dialog::backdrop { background: var(--paper); opacity: 0.85; }
+/* animira se sadržaj, ne sam dialog: transform na dialogu bi zarobio konfete (position: fixed) */
+.badge-dialog[open] { animation: ba-fade 200ms var(--ease); }
+.badge-dialog[open] .badge-dialog-body { animation: ba-pop 320ms var(--ease-bounce); }
+.badge-dialog-body { display: grid; justify-items: center; gap: 12px; text-align: center; }
+.badge-dialog h2 { font-size: 1.3rem; }
+.badge-new-list { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 14px 18px; list-style: none; padding: 0; margin: 0; }
+.badge-new-list li { display: grid; justify-items: center; gap: 4px; width: 150px; }
+.badge-new-list .badge-art { animation: ba-wiggle 600ms var(--ease-bounce) 200ms both; }
+.badge-new-list .muted { font-size: 0.8rem; }
+
+@keyframes ba-wiggle { 0% { transform: scale(0.7) rotate(-8deg); } 60% { transform: scale(1.08) rotate(4deg); } 100% { transform: none; } }
+@keyframes ba-fade { from { opacity: 0; } }
+@keyframes ba-pop { from { opacity: 0; transform: scale(0.92) translateY(8px); } to { opacity: 1; transform: none; } }

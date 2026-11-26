@@ -36,6 +36,12 @@ export function formatLong(iso: string): string {
   return `${DAYS[p.wd]}, ${p.d}.${pad2(p.m)}.${p.y}. u ${p.hh}:${p.mm}`;
 }
 
+/** "02.12.2026." */
+export function formatDate(iso: string): string {
+  const p = parts(iso);
+  return `${p.d}.${pad2(p.m)}.${p.y}.`;
+}
+
 export const formatDay = (iso: string) => parts(iso).d;
 export const formatMonth = (iso: string) => MONTHS_SHORT[parts(iso).m - 1] ?? '';
 

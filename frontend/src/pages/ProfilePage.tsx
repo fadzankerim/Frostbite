@@ -4,6 +4,7 @@ import { useState, type FormEvent } from 'react';
 import { displayName, useMe } from '../api/auth';
 import { ApiError } from '../api/client';
 import { useChangePassword, useProfile, useUpdateProfile, type Profile } from '../api/hiker';
+import { MyBadgesSection } from '../components/Badges';
 import { Field, Notice, PasswordInput, SubmitButton } from '../components/forms';
 import { Frosti } from '../components/Frosti';
 import { Loading } from '../components/guards';
@@ -125,6 +126,7 @@ export function ProfilePage() {
           <PasswordForm email={profile.data.email} />
         </div>
       )}
+      <MyBadgesSection />
     </section>
   );
 }
