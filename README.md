@@ -179,6 +179,9 @@ osim endpointa koji to izričito dozvoljavaju.
 | GET | `/api/me/memberships/` | vlastita članstva i zahtjevi · planinar |
 | GET, PUT | `/api/me/profile/` | vlastiti profil (email, uloge i status se ne mogu mijenjati) |
 | POST | `/api/me/password/` | promjena lozinke uz staru; ostale sesije se odjavljuju |
+| GET | `/api/guide/` | ture koje vodič vodi i ture vlastitih društava bez vodiča · vodič |
+| GET | `/api/guide/tours/<id>/` | učesnici sa ličnim podacima (samo odobreni vodič, do 7 dana nakon ture; pristup se bilježi) |
+| POST | `/api/guide/tours/<id>/apply/` · `close/` · `attendance/` · `report/` | prijava za vođenje, zatvaranje prijava, prisustvo `{"present": [id]}`, izvještaj `{"text"}` |
 
 "Planinar" znači prijavljen korisnik koji nije sistemski admin (isto pravilo kao `hiker_required`).
 Pravila prijave, odjave i liste čekanja su u `tours/services.py` i ista su za stare i nove stranice.

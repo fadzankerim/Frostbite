@@ -130,7 +130,7 @@ function Header() {
           <div className="nav-group">
             <NavLink to="/ture" className="nav-link">Ture</NavLink>
             <NavLink to="/drustva" className="nav-link">Društva</NavLink>
-            {user?.roles.guide && <Legacy href="/vodic/">Vođenje</Legacy>}
+            {user?.roles.guide && <NavLink to="/vodic" className="nav-link">Vođenje</NavLink>}
             {user?.roles.clubAdmin && <Legacy href="/upravljanje/">Upravljanje</Legacy>}
             {user?.roles.systemAdmin && <Legacy href="/sistem/">Sistem</Legacy>}
             {!user?.roles.systemAdmin && <SelectionLink />}
