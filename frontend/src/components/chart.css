@@ -1,0 +1,27 @@
+.chart { margin: 0; padding: 18px; border: 1px solid var(--line); border-radius: calc(var(--radius) + 4px); background: var(--surface); }
+.chart-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 8px; }
+.chart-head > div { display: grid; gap: 2px; }
+.chart-title { font-weight: 600; }
+.chart-total { font-size: 1.4rem; letter-spacing: -0.02em; }
+.chart-plot { position: relative; }
+.chart-plot svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart-grid line { stroke: var(--line); stroke-width: 1; }
+.chart-grid text, .chart-x { font-family: var(--font-mono); font-size: 10px; fill: var(--ink-3); }
+.chart-base { stroke: var(--line-strong); stroke-width: 1; }
+.chart-bar { transition: opacity var(--dur) var(--ease); transform-box: fill-box; transform-origin: bottom; animation: bar-grow 600ms var(--ease-bounce) both; }
+.chart-bar.chart-1 { fill: var(--chart-1); }
+.chart-bar.chart-2 { fill: var(--chart-2); }
+.chart-plot:hover .chart-bar:not(.is-hover) { opacity: 0.55; }
+.chart-hit { fill: transparent; cursor: default; outline: none; }
+.chart-hit:focus-visible { stroke: var(--accent); stroke-width: 1.5; }
+.chart-tip {
+  position: absolute; top: 0; transform: translateX(-50%); pointer-events: none;
+  display: grid; gap: 1px; padding: 6px 10px; white-space: nowrap;
+  background: var(--fun-paper); border: 1.5px solid var(--fun-ink); border-radius: var(--radius-sm); box-shadow: 2px 2px 0 var(--fun-ink);
+}
+.chart-tip strong { font-size: 0.95rem; }
+.chart-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.chart-table th, .chart-table td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+.chart-table th { font-weight: 500; color: var(--ink-2); }
+@keyframes bar-grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@media (prefers-reduced-motion: reduce) { .chart-bar { animation: none; } }

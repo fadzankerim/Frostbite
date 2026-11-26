@@ -40,6 +40,10 @@
   --frosti-hat: #ff6b5b;
   --frosti-blush: #ff9e7a;
 
+  /* grafikoni (validirano: dataviz validate_palette, svijetla i tamna površina) */
+  --chart-1: #2b59ff;
+  --chart-2: #17885a;
+
   /* težina ture */
   --d-easy: #17885a;
   --d-medium: #d98a00;
@@ -86,6 +90,8 @@
   --d-medium: #f0a63a;
   --d-hard: #ff7a5c;
   --d-extreme: #b98bff;
+  --chart-1: #6688f5;
+  --chart-2: #33a877;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -120,6 +126,8 @@
     --d-medium: #f0a63a;
     --d-hard: #ff7a5c;
     --d-extreme: #b98bff;
+    --chart-1: #6688f5;
+    --chart-2: #33a877;
   }
 }
 

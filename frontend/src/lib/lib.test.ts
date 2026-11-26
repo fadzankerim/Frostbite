@@ -102,3 +102,21 @@ describe('ID iz URL-a', async () => {
   it.each([['1', 1], ['42', 42], ['abc', null], ['0', null], ['-1', null], ['1.5', null], ['1e3', null], ['', null], [undefined, null], ['9999999999', null]])(
     '%s -> %s', (raw, out) => expect(parseId(raw as string | undefined)).toBe(out));
 });
+
+describe('panel admina: ruta i grafikon', async () => {
+  const { reducePoints, MAX_POINTS } = await import('./route');
+  const { niceScale } = await import('../components/ColumnChart');
+  it('ruta se svodi na najviše 500 tačaka i zadržava krajeve', () => {
+    const pts = Array.from({ length: 5000 }, (_, i) => [43 + i * 0.0001, 18 + Math.sin(i / 50) * 0.01] as [number, number]);
+    const out = reducePoints(pts);
+    expect(out.length).toBeLessThanOrEqual(MAX_POINTS);
+    expect(out[0]).toEqual(pts[0]);
+  });
+  it('kratka ruta ostaje ista', () => {
+    const pts: [number, number][] = [[43, 18], [43.1, 18.1], [43.2, 18]];
+    expect(reducePoints(pts)).toEqual(pts);
+  });
+  it.each([[0, 4, 1], [7, 8, 2], [23, 30, 10], [180, 200, 50], [1234, 1500, 500]])('skala za %i -> max %i, korak %i', (v, max, step) => {
+    expect(niceScale(v)).toEqual({ max, step });
+  });
+});
