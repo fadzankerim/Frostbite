@@ -478,3 +478,25 @@ a.mini-row:hover { border-color: var(--fun-ink); }
 .edit-point { display: block; width: 10px; height: 10px; margin: 2px; border-radius: 50%; background: var(--surface); border: 2px solid var(--accent); }
 .edit-point.is-start { background: var(--accent); }
 .edit-point.is-end { background: var(--fun-ink); border-color: var(--fun-ink); }
+
+/* --- Sistemski panel ---------------------------------------------------------------- */
+.stat-tiles-3 { grid-template-columns: repeat(5, 1fr); }
+@media (max-width: 1000px) { .stat-tiles-3 { grid-template-columns: repeat(2, 1fr); } }
+.stat-tile.is-alert { background: var(--danger-soft); }
+.event-row .mini-main { gap: 4px; }
+.audit-chip { height: auto; padding: 2px 8px; font-size: 0.7rem; letter-spacing: 0.02em; white-space: nowrap; }
+.club-status-na_cekanju { background: var(--fun-sun); }
+.club-status-odobreno { background: var(--fun-mint); }
+.club-status-odbijeno, .club-status-suspendovano { background: var(--fun-coral); }
+.search-bar { display: flex; gap: 8px; max-width: 520px; }
+.search-bar .input { flex: 1; }
+.pager { display: flex; align-items: center; justify-content: center; gap: 14px; margin-top: 8px; }
+.is-refreshing { opacity: 0.55; transition: opacity var(--dur) var(--ease); }
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.audit-table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+.audit-table th, .audit-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.audit-table th { position: sticky; top: 0; background: var(--paper-2); font-weight: 500; color: var(--ink-2); }
+.audit-table tbody tr:hover { background: var(--paper-2); }
+.audit-details { max-width: 320px; overflow-wrap: anywhere; color: var(--ink-2); }
+.nowrap { white-space: nowrap; }
+.event-row .audit-chip { justify-self: start; }

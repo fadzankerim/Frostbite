@@ -9,6 +9,7 @@ import {
   ManageDashboardTab, ManageGuidesTab, ManageIndexPage, ManageLayout, ManageMembersTab, ManageProfileTab,
   ManageTourCreate, ManageTourDetail, ManageTourEdit, ManageToursTab,
 } from './pages/ManagePages';
+import { SystemAuditTab, SystemClubsTab, SystemDashboardTab, SystemLayout, SystemUsersTab } from './pages/SystemPages';
 import { MyMembershipsPage, MyRegistrationsPage, SelectionPage } from './pages/HikerPages';
 import { HomePage } from './pages/HomePage';
 import { ProfilePage } from './pages/ProfilePage';
@@ -50,6 +51,16 @@ export const router = createBrowserRouter(
             { path: 'vodici', element: <ManageGuidesTab /> },
             { path: 'clanovi', element: <ManageMembersTab /> },
             { path: 'profil', element: <ManageProfileTab /> },
+          ],
+        },
+        {
+          path: 'sistem',
+          element: <RequireRole role="systemAdmin"><SystemLayout /></RequireRole>,
+          children: [
+            { index: true, element: <SystemDashboardTab /> },
+            { path: 'drustva', element: <SystemClubsTab /> },
+            { path: 'korisnici', element: <SystemUsersTab /> },
+            { path: 'evidencija', element: <SystemAuditTab /> },
           ],
         },
         { path: 'zabranjeno', element: <ForbiddenPage /> },

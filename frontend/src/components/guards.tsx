@@ -49,12 +49,21 @@ export function RequireRole({ role, children }: { role: keyof Roles; children: R
   );
 }
 
-/** Prijava i registracija: prijavljeni korisnik ide dalje (na ?next=, provjeren, ili početnu). */
+/** Početna stranica prema ulozi (kao na starim stranicama): sistemski admin -> sistem,
+ *  admin društva -> upravljanje, vodič -> vođenje, planinar -> početna. */
+export function landingFor(roles: Roles): string {
+  if (roles.systemAdmin) return '/sistem';
+  if (roles.clubAdmin) return '/upravljanje';
+  if (roles.guide) return '/vodic';
+  return '/';
+}
+
+/** Prijava i registracija: prijavljeni korisnik ide dalje (na provjeren ?next= ili početnu svoje uloge). */
 export function GuestOnly({ children }: { children: ReactNode }) {
   const { data, isPending } = useMe();
   const [params] = useSearchParams();
   if (isPending) return <Loading />;
-  if (data?.authenticated) return <Navigate to={safeNext(params.get('next'))} replace />;
+  if (data?.authenticated) return <Navigate to={safeNext(params.get('next'), landingFor(data.user.roles))} replace />;
   return children;
 }
 

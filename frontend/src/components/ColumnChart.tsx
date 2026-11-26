@@ -7,7 +7,7 @@ import { formatNumber } from '../lib/format';
 import './chart.css';
 
 type Item = { label: string; value: number };
-type Props = { title: string; items: Item[]; unit?: string; color?: 'chart-1' | 'chart-2' };
+type Props = { title: string; items: Item[]; unit?: string; color?: 'chart-1' | 'chart-2'; xLabel?: string };
 
 const W = 640;
 const H = 220;
@@ -34,7 +34,7 @@ function barPath(x: number, y: number, w: number, h: number): string {
 
 const fmt = (v: number, unit: string) => `${formatNumber(Math.round(v))}${unit}`;
 
-export function ColumnChart({ title, items, unit = '', color = 'chart-1' }: Props) {
+export function ColumnChart({ title, items, unit = '', color = 'chart-1', xLabel = 'Mjesec' }: Props) {
   const id = useId();
   const [hover, setHover] = useState<number | null>(null);
   const [table, setTable] = useState(false);
@@ -46,6 +46,7 @@ export function ColumnChart({ title, items, unit = '', color = 'chart-1' }: Prop
   const ticks = Array.from({ length: Math.round(max / step) + 1 }, (_, i) => i * step);
   const total = items.reduce((s, i) => s + i.value, 0);
   const hovered = hover !== null ? items[hover] : undefined;
+  const labelEvery = Math.ceil(items.length / 7);      // najviše ~7 oznaka na osi, bez preklapanja
 
   return (
     <figure className="chart" aria-labelledby={`${id}-t`}>
@@ -61,7 +62,7 @@ export function ColumnChart({ title, items, unit = '', color = 'chart-1' }: Prop
 
       {table ? (
         <table className="chart-table">
-          <thead><tr><th scope="col">Mjesec</th><th scope="col">{title}</th></tr></thead>
+          <thead><tr><th scope="col">{xLabel}</th><th scope="col">{title}</th></tr></thead>
           <tbody>{items.map((i) => <tr key={i.label}><td>{i.label}</td><td className="mono">{fmt(i.value, unit)}</td></tr>)}</tbody>
         </table>
       ) : (
@@ -83,7 +84,7 @@ export function ColumnChart({ title, items, unit = '', color = 'chart-1' }: Prop
               return (
                 <g key={it.label}>
                   <path className={`chart-bar ${color}${hover === i ? ' is-hover' : ''}`} d={barPath(x, y, bw, h)} />
-                  <text className="chart-x" x={x + bw / 2} y={H - 8} textAnchor="middle">{it.label}</text>
+                  {i % labelEvery === 0 && <text className="chart-x" x={x + bw / 2} y={H - 8} textAnchor="middle">{it.label}</text>}
                   {/* zona za hover/fokus šira od stuba */}
                   <rect className="chart-hit" x={PAD.left + i * slot} y={PAD.top} width={slot} height={ph}
                     tabIndex={0} aria-label={`${it.label}: ${fmt(it.value, unit)}`}
