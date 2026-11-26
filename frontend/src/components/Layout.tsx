@@ -16,11 +16,6 @@ export function Logo() {
   );
 }
 
-/** Stare Django stranice (još nisu prebačene u React) - običan link, puno učitavanje stranice. */
-function Legacy({ href, children }: { href: string; children: string }) {
-  return <a className="nav-link" href={href}>{children}</a>;
-}
-
 function initialsOf(user: User): string {
   return ((user.firstName[0] ?? '') + (user.lastName[0] ?? '')).toUpperCase() || (user.email[0] ?? '?').toUpperCase();
 }
@@ -132,7 +127,7 @@ function Header() {
             <NavLink to="/drustva" className="nav-link">Društva</NavLink>
             {user?.roles.guide && <NavLink to="/vodic" className="nav-link">Vođenje</NavLink>}
             {user?.roles.clubAdmin && <NavLink to="/upravljanje" className="nav-link">Upravljanje</NavLink>}
-            {user?.roles.systemAdmin && <Legacy href="/sistem/">Sistem</Legacy>}
+            {user?.roles.systemAdmin && <NavLink to="/sistem" className="nav-link">Sistem</NavLink>}
             {!user?.roles.systemAdmin && <SelectionLink />}
           </div>
           <div className="nav-group">

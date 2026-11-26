@@ -190,9 +190,13 @@ osim endpointa koji to izričito dozvoljavaju.
 | GET, POST | `/api/manage/<c>/guides/` · `guides/<id>/remove/` | vodiči društva (dodavanje po emailu - ista poruka bez obzira na nalog) |
 | GET, POST | `/api/manage/<c>/members/` · `members/<id>/decide/` | zahtjevi za članstvo i aktivni članovi |
 | GET, PUT | `/api/manage/<c>/profile/` | profil društva (naziv i status mijenja samo sistemski admin) |
+| GET | `/api/system/` | analitika platforme i sigurnosni događaji (samo zbirni podaci) · sistemski admin |
+| GET, POST | `/api/system/clubs/` · `clubs/<id>/decide/` | društva; odobravanje, odbijanje, suspenzija `{"action"}` |
+| GET, POST | `/api/system/users/?q=&page=` · `users/<id>/toggle/` | nalozi (ime, email, status); blokiranje gasi sve sesije; vlastiti nalog ne |
+| GET | `/api/system/audit/?action=&page=` | evidencija aktivnosti, samo čitanje |
 
 ""Admin društva" vidi samo društva kojima upravlja: tuđe društvo, tura, vodič ili članstvo daju 404
-(i preko URL-a vlastitog društva). Pravila su u `panel/club_service.py` i `panel/guide_service.py`,
+(i preko URL-a vlastitog društva). Pravila su u `panel/club_service.py`, `panel/guide_service.py` i `panel/system_service.py`,
 zajednička za stare stranice i API.
 
 "Planinar" znači prijavljen korisnik koji nije sistemski admin (isto pravilo kao `hiker_required`).

@@ -120,3 +120,13 @@ describe('panel admina: ruta i grafikon', async () => {
     expect(niceScale(v)).toEqual({ max, step });
   });
 });
+
+describe('početna stranica po ulozi', async () => {
+  const { landingFor } = await import('../components/guards');
+  it.each([
+    [{ systemAdmin: true, clubAdmin: false, guide: false }, '/sistem'],
+    [{ systemAdmin: false, clubAdmin: true, guide: true }, '/upravljanje'],
+    [{ systemAdmin: false, clubAdmin: false, guide: true }, '/vodic'],
+    [{ systemAdmin: false, clubAdmin: false, guide: false }, '/'],
+  ])('%o -> %s', (roles, path) => expect(landingFor(roles)).toBe(path));
+});
