@@ -1,6 +1,6 @@
 """Javni API tura (/api/tours/) za React frontend.
 
-Vidljivost je ista kao na HTML stranicama (politika 4.4): samo public_tours(), tj. OBJAVLJENE ture
+Vidljivost (politika 4.4): samo public_tours(), tj. OBJAVLJENE ture
 odobrenih društava sa polaskom u narednih 30 dana. Sve ostalo daje 404, isto kao nepostojeća tura.
 Odgovori sadrže samo izričito nabrojana polja (bez created_by, učesnika i sl.); vodiči samo
 imenom i prezimenom. Endpointi su samo za čitanje (GET); sve ostalo je 405.
@@ -17,7 +17,7 @@ from frostbite.api import ApiView, form_errors
 from . import services
 from .forms import TourSearchForm
 from .models import Tour, TourGuide, TourRegistration
-from .views import _selection, public_tours
+from .queries import public_tours, selection as _selection
 
 MAX_TRACE_POINTS = 40
 

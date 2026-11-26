@@ -1,4 +1,4 @@
-"""API panela vodiča (/api/guide/). Pravila su u panel.guide_service (ista kao HTML panel).
+"""API panela vodiča (/api/guide/). Pravila su u panel.guide_service.
 
 Lični podaci učesnika (telefon, hitni kontakt, zdravstvene napomene) izlaze SAMO odobrenom
 vodiču te ture, najviše 7 dana nakon ture, i svaki pristup se bilježi (PRISTUP_LICNIM_PODACIMA).

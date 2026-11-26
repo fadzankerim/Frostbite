@@ -135,3 +135,18 @@ export function useUpdateProfile() {
 export function useChangePassword() {
   return useMutation({ mutationFn: (p: PasswordInput) => api.post<{ detail: string }>('/api/me/password/', p) });
 }
+
+// --- zahtjev za registraciju društva (F09) ----------------------------------------------
+export type ClubRequestInput = { name: string; city: string; description: string; email: string; phone: string };
+
+export function useClubRequestStatus() {
+  return useQuery({ queryKey: ['me', 'club-request'], queryFn: () => api.get<{ canRequest: boolean }>('/api/clubs/request/') });
+}
+
+export function useRequestClub() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (d: ClubRequestInput) => api.post<{ id: number; detail: string }>('/api/clubs/request/', d),
+    onSettled: () => qc.invalidateQueries({ queryKey: ['me', 'club-request'] }),
+  });
+}

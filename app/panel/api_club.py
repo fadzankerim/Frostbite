@@ -131,7 +131,7 @@ _FORM_TO_API = {v: k for k, v in _TOUR_FIELDS.items()}
 
 
 def _tour_form(request, instance=None):
-    """JSON -> TourForm. Vrijednosti se predaju kao tekst (kao iz HTML forme); validira ih forma.
+    """JSON -> TourForm. Vrijednosti se predaju kao tekst (kao iz forme); validira ih forma.
     Polja koja nisu u _TOUR_FIELDS (status, club, created_by...) se ignorišu."""
     d = _body(request)
     data = {}
@@ -244,7 +244,7 @@ class GuideDecideView(ClubAdminView):
 
 
 class MembersView(ClubAdminView):
-    """F26, F28 - zahtjevi i aktivni članovi (ime i datumi; bez kontakt podataka, kao HTML panel)."""
+    """F26, F28 - zahtjevi i aktivni članovi (ime i datumi; bez kontakt podataka)."""
 
     def get(self, request, club_pk):
         pending, active = svc.members(self.club)

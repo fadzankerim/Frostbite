@@ -1,6 +1,6 @@
 """Auth API za React frontend (/api/auth/).
 
-Koristi iste forme i isti backend kao HTML stranice, pa važe ista pravila:
+Koristi Django forme i LockoutEmailBackend, pa važe sva pravila politike:
 zaključavanje naloga, generička poruka greške, validatori lozinke, audit log,
 nova sesija pri prijavi i bez otkrivanja postojećih naloga pri registraciji.
 
@@ -23,8 +23,7 @@ from frostbite.api import ApiView, form_errors
 
 from .forms import BosnianPasswordChangeForm, LoginForm, ProfileForm, RegistrationForm
 from .permissions import is_club_admin, is_guide
-from .services import register_hiker
-from .views import REGISTER_DONE_MSG
+from .services import REGISTER_DONE_MSG, register_hiker
 
 
 def user_payload(user):

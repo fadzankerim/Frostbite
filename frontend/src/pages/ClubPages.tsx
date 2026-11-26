@@ -22,10 +22,15 @@ function initials(name: string): string {
 
 export function ClubsPage() {
   const clubs = useClubs();
+  const { data: me } = useMe();
+  const canRequest = me?.authenticated && !me.user.roles.systemAdmin;
   return (
     <section className="container page">
       <span className="label-mono">Planinarska društva</span>
-      <h1 className="page-title">Društva</h1>
+      <div className="section-head">
+        <h1 className="page-title">Društva</h1>
+        {canRequest && <Link className="btn btn-ghost btn-sm" to="/drustva/novo">+ Registruj društvo</Link>}
+      </div>
       <p className="muted page-lead">Odobrena planinarska društva i njihove ture u narednih 30 dana.</p>
 
       {clubs.isPending && <div className="club-grid">{Array.from({ length: 3 }, (_, i) => <div key={i} className="skeleton" />)}</div>}

@@ -8,7 +8,7 @@ from django.urls import reverse
 from audit.models import AuditLog
 from clubs.models import Club, ClubAdmin
 
-from .tests import Base
+from .test_base import Base
 
 
 class SystemApiTests(Base):

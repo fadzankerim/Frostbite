@@ -10,7 +10,7 @@ from audit.models import AuditLog
 from clubs.models import Club, ClubGuide, ClubMembership
 from tours.models import Tour, TourGuide, TourRegistration
 
-from .tests import Base
+from .test_base import Base
 
 
 class ClubApiBase(Base):
@@ -200,3 +200,27 @@ class GuidesAndMembersApiTests(ClubApiBase):
         self.assertEqual(d['fill'], {'taken': 1, 'capacity': 10, 'pct': 10})
         self.assertEqual(len(d['months']), 6)
         self.assertNotIn('TAJNA', json.dumps(d))
+
+
+class PortedRulesTests(ClubApiBase):
+    def test_revenue_counts_present_only(self):
+        done = self.tour(self.A, days=-3, registration_deadline=timezone.now() - timedelta(days=4),
+                         status=Tour.Status.DONE, price=10)
+        TourRegistration.objects.create(tour=done, user=self.hiker, attendance='PRISUSTVOVAO')
+        TourRegistration.objects.create(tour=done, user=self.guideA2, attendance='NIJE_DOSAO')
+        self.login(self.adminA)
+        d = self.get('dashboard', self.A.pk).json()
+        self.assertEqual(d['money']['earned'], 10.0)
+        self.assertEqual(d['phases']['done'], 1)
+
+    def test_cannot_assign_participant_or_to_finished_tour(self):
+        g2 = ClubGuide.objects.get(user=self.guideA2)
+        TourRegistration.objects.create(tour=self.tA, user=self.guideA2)
+        self.login(self.adminA)
+        r = self.send('post', 'assign', self.A.pk, self.tA.pk, data={'guideId': g2.pk})
+        self.assertEqual(r.json()['detail'], 'Vodič je prijavljen kao učesnik ove ture.')
+        self.assertFalse(TourGuide.objects.filter(tour=self.tA, user=self.guideA2).exists())
+        Tour.objects.filter(pk=self.tA.pk).update(status=Tour.Status.CANCELLED)
+        TourRegistration.objects.filter(user=self.guideA2).update(status='ODJAVLJEN')
+        self.assertEqual(self.send('post', 'assign', self.A.pk, self.tA.pk, data={'guideId': g2.pk}).status_code, 400)
+        self.assertFalse(TourGuide.objects.filter(tour=self.tA, user=self.guideA2).exists())

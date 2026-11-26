@@ -1,6 +1,6 @@
 """Pravila sistemskog admina (F29-F31; politike 4.5, 4.6, 4.8, ograničenje 5).
 
-Zajednička logika za HTML panel (views_system) i JSON API (api_system). Sistemski admin NE vidi
+Koristi ga JSON API (api_system). Sistemski admin NE vidi
 telefon, hitni kontakt ni zdravstvene napomene (politika 4.5): upiti učitavaju samo ime, prezime,
 email i status naloga. Evidencija aktivnosti je samo za čitanje (tabela je append-only i u bazi).
 """

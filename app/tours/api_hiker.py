@@ -1,8 +1,8 @@
 """API planinara za ture (F10, F11, F12): prijava i odjava, odabir više tura, moje prijave.
 
 Sva pravila su u tours.services (transakcija + SELECT FOR UPDATE, lista čekanja, rokovi, članstvo,
-vodič se ne prijavljuje na svoju turu). Odabir tura dijeli isti ključ sesije kao HTML stranice,
-pa je korpa ista u starom i novom interfejsu.
+vodič se ne prijavljuje na svoju turu). Odabir tura se čuva u sesiji
+(i prije prijave na sistem, pa ostaje nakon prijave).
 """
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -15,7 +15,7 @@ from frostbite.api import ApiView, IsHiker
 from . import services
 from .api import tour_summary
 from .models import Tour, TourRegistration
-from .views import MAX_SELECTION, SELECTION_KEY, _selection, public_tours
+from .queries import MAX_SELECTION, SELECTION_KEY, public_tours, selection as _selection
 
 
 def _reg_payload(reg):

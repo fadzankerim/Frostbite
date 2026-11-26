@@ -1,6 +1,6 @@
 ---
 name: frostbite-frontend
-description: Pravila dizajna i sigurnosti za React frontend Frostbite aplikacije (frontend/). Učitati PRIJE pisanja ili mijenjanja bilo koje React stranice, komponente, stila ili animacije u frontend/ - moderan minimalistički dizajn bez gradijenata, Geist font, animacije na temu planinarenja, futuristički detalji i maksimalna sigurnost.
+description: Pravila dizajna i sigurnosti za React frontend Frostbite aplikacije (frontend/). Učitati PRIJE pisanja ili mijenjanja bilo koje React stranice, komponente, stila ili animacije u frontend/ - moderan i razigran dizajn bez gradijenata (maskota Frosti, crtane ilustracije, svijetla/tamna tema), Geist font, animacije na temu planinarenja, futuristički detalji i maksimalna sigurnost.
 ---
 
 # Frostbite frontend - dizajn i sigurnost

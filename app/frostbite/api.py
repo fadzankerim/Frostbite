@@ -1,6 +1,6 @@
 """Zajednička pravila za JSON API (/api/).
 
-Autentikacija je ista kao za HTML stranice: Django sesija u HttpOnly kolačiću.
+Autentikacija: Django sesija u HttpOnly kolačiću.
 Nema JWT-a ni tokena u pregledaču, pa XSS ne može ukrasti sesiju, a blokiranje
 naloga i promjena lozinke odmah poništavaju postojeće sesije.
 CSRF pravila su u frostbite.authentication.
@@ -26,7 +26,7 @@ def form_errors(form):
 
 class IsHiker(BasePermission):
     """Funkcionalnosti planinara (F09-F14): prijavljen korisnik koji NIJE sistemski admin.
-    Isto pravilo kao accounts.permissions.hiker_required za HTML stranice."""
+    Nepoznat ili anoniman korisnik dobija 403."""
     message = 'Ova radnja nije dozvoljena.'
 
     def has_permission(self, request, view):

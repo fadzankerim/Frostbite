@@ -40,12 +40,12 @@ Detaljna prava svake uloge (funkcionalnosti F01 do F31) definisana su u sigurnos
 
 | Sloj | Tehnologija |
 |---|---|
-| Backend | Python 3.12+ (server: 3.14), Django 6.1, Gunicorn |
+| Backend | Python 3.12+ (server: 3.14), Django 6.1 + Django REST Framework (samo JSON API), Gunicorn |
 | Baza | PostgreSQL 18 (produkcija), SQLite (lokalni razvoj) |
 | Web server | Nginx (TLS 1.2/1.3, sigurnosna zaglavlja, CSP) |
-| Frontend | Django predlošci, vlastiti CSS, mali JavaScript moduli bez okvira |
-| Mape | Leaflet 1.9.4 (lokalno), podloge Esri World Topo, OpenTopoMap, OpenStreetMap |
-| Ikonice | Lucide (lokalni SVG sprite) |
+| Frontend | React 19, TypeScript, Vite, React Router, TanStack Query; vlastiti CSS (tokeni, svijetla i tamna tema), fontovi Geist |
+| Mape | Leaflet 1.9.4 (npm paket, dio builda), podloge Esri World Topo, OpenTopoMap, OpenStreetMap |
+| Grafika | crtani SVG elementi iz koda: maskota Frosti, generisane ilustracije planina, grafikoni |
 | Infrastruktura | AWS (VPC, EC2), Ubuntu Server 26.04 LTS, OpenVPN |
 
 
@@ -53,16 +53,21 @@ Detaljna prava svake uloge (funkcionalnosti F01 do F31) definisana su u sigurnos
 
 ```
 .
-├── app/                        Django aplikacija
-│   ├── frostbite/              postavke, glavni URL-ovi
+├── app/                        Django: samo JSON API (/api/)
+│   ├── frostbite/              postavke, glavni URL-ovi, zajednička API pravila
 │   ├── accounts/               korisnici, prijava, zaključavanje naloga, pravila pristupa
 │   ├── clubs/                  društva i članstva
-│   ├── tours/                  ture, prijave, mapa, GPX, ilustracije tura
-│   ├── panel/                  vodič, admin društva, sistemski admin, analitika
+│   ├── tours/                  ture, prijave, lista čekanja, odabir, GPX
+│   ├── panel/                  vodič, admin društva, sistemski admin, analitika (*_service.py)
 │   ├── audit/                  evidencija aktivnosti (samo dodavanje)
-│   ├── templates/              HTML predlošci
-│   ├── static/                 CSS, JavaScript, ikonice, Leaflet
 │   └── requirements.txt
+├── frontend/                   React aplikacija (cijeli interfejs)
+│   ├── src/api/                pozivi API-ja (jedan klijent: same-origin, CSRF)
+│   ├── src/pages/              stranice po ulogama
+│   ├── src/components/         mapa, kartice, maskota, ilustracije, grafikoni
+│   └── src/styles/tokens.css   sve boje (bez gradijenata)
+├── docker/nginx/               Nginx za Docker (TLS, zaglavlja, CSP, React + /api/)
+├── docker-compose.yml          Nginx + Django/Gunicorn + PostgreSQL
 ├── infra/
 │   ├── deploy.sh               postavljanje aplikacije sa vašeg računara na server
 │   ├── vpn/vpn-hardening.sh    NAT, split tunnel i firewall na VPN serveru
@@ -75,30 +80,36 @@ Važna mjesta u kodu:
 - `app/accounts/permissions.py`: centralna pravila pristupa (koje društvo, koja tura, koja uloga)
 - `app/accounts/backends.py`: prijava i zaključavanje naloga
 - `app/tours/services.py`: prijava i odjava sa ture (transakcije i lista čekanja)
+- `app/panel/*_service.py`: pravila panela vodiča, admina društva i sistemskog admina
 - `app/frostbite/settings.py`: sve sigurnosne postavke Django-a
+- `frontend/src/api/client.ts`: jedini HTTP klijent (samo `/api/`, CSRF token u memoriji)
+- `.claude/skills/frostbite-frontend/SKILL.md`: pravila dizajna i sigurnosti za frontend
 
 ## Lokalno pokretanje
 
-Potrebno: **Python 3.12 ili noviji** i `git`. PostgreSQL nije potreban; lokalno se koristi SQLite.
+Potrebno: **Python 3.12 ili noviji**, **Node.js 24** i `git`. PostgreSQL nije potreban; lokalno se koristi SQLite.
 
 ```bash
-# 1. Preuzmite projekat i uđite u folder aplikacije
+# 1. Preuzmite projekat
 git clone <adresa-repozitorija> frostbite
-cd frostbite/app
+cd frostbite
 
-# 2. Virtualno okruženje i paketi
+# 2. Django API: okruženje, paketi, baza i demo podaci
+cd app
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
-
-# 3. Baza i demo podaci
 .venv/bin/python manage.py migrate
 .venv/bin/python manage.py seed_demo
+.venv/bin/python manage.py runserver          # API na :8000 (terminal 1)
 
-# 4. Pokretanje
-.venv/bin/python manage.py runserver
+# 3. React interfejs (terminal 2)
+cd frontend
+npm ci
+npm run dev
 ```
 
-Aplikacija je dostupna na **http://127.0.0.1:8000**.
+Aplikacija je dostupna na **http://localhost:5173**. Vite prosljeđuje `/api` na Django, pa sve radi
+na istom originu kao u produkciji (kolačići i CSRF bez CORS-a).
 
 Na Windowsu umjesto `.venv/bin/python` koristite `.venv\Scripts\python`.
 
@@ -130,7 +141,7 @@ Aplikacija je na `https://localhost` (samopotpisani certifikat, pregledač će t
 
 | Servis | Uloga | Izložen |
 |---|---|---|
-| `web` | Nginx: TLS, sigurnosna zaglavlja, CSP, rate limit, statičke datoteke | 80, 443 |
+| `web` | Nginx: TLS, sigurnosna zaglavlja, CSP, rate limit, React aplikacija, `/api/` -> backend | 80, 443 |
 | `backend` | Django + Gunicorn, ne-root korisnik, datotečni sistem samo za čitanje | ne |
 | `db` | PostgreSQL 18 na internoj mreži bez izlaza na internet | ne |
 
@@ -151,8 +162,8 @@ docker compose down -v                            # zaustavljanje i BRISANJE baz
 
 ## JSON API
 
-API za React frontend je pod `/api/` (Django REST Framework). Autentikacija je ista kao za
-HTML stranice: Django sesija u `HttpOnly` kolačiću, bez JWT-a i bez tokena u pregledaču.
+Django služi samo JSON API pod `/api/` (Django REST Framework); interfejs je React aplikacija.
+Autentikacija: Django sesija u `HttpOnly` kolačiću, bez JWT-a i bez tokena u pregledaču.
 Svaki zahtjev koji mijenja stanje mora imati zaglavlje `X-CSRFToken`, i za neprijavljene
 korisnike (zaštita od login CSRF-a). API prima i vraća samo JSON, i ništa nije dozvoljeno bez prijave
 osim endpointa koji to izričito dozvoljavaju.
@@ -166,6 +177,7 @@ osim endpointa koji to izričito dozvoljavaju.
 | POST | `/api/auth/register/` | `{"email", "firstName", "lastName", "phone", "password", "passwordConfirm"}` → 201 |
 | GET | `/api/tours/` | javne ture (`?q, difficulty, club, date_from, date_to`; neispravan filter → 400) |
 | GET | `/api/tours/<id>/` | detalji javne ture (ruta, vodiči samo imenom, vlastita prijava) |
+| GET | `/api/tours/<id>/gpx/` | ruta javne ture kao GPX datoteka |
 | GET | `/api/tours/filters/` | težine i odobrena društva za filtere |
 | GET | `/api/tours/stats/` | zbirne brojke za početnu |
 | GET | `/api/clubs/`, `/api/clubs/<id>/` | odobrena društva, javni profil i njihove ture |
@@ -177,6 +189,7 @@ osim endpointa koji to izričito dozvoljavaju.
 | POST | `/api/selection/confirm/` | prijava na sve odabrane ture, rezultat po turi · planinar |
 | POST | `/api/clubs/<id>/membership/` | zahtjev za članstvo · planinar |
 | GET | `/api/me/memberships/` | vlastita članstva i zahtjevi · planinar |
+| GET, POST | `/api/clubs/request/` | zahtjev za registraciju društva (najviše jedan na čekanju) · planinar |
 | GET, PUT | `/api/me/profile/` | vlastiti profil (email, uloge i status se ne mogu mijenjati) |
 | POST | `/api/me/password/` | promjena lozinke uz staru; ostale sesije se odjavljuju |
 | GET | `/api/guide/` | ture koje vodič vodi i ture vlastitih društava bez vodiča · vodič |
@@ -202,27 +215,21 @@ zajednička za stare stranice i API.
 "Planinar" znači prijavljen korisnik koji nije sistemski admin (isto pravilo kao `hiker_required`).
 Pravila prijave, odjave i liste čekanja su u `tours/services.py` i ista su za stare i nove stranice.
 
-Javni endpointi (`tours`, `clubs`) koriste iste upite kao HTML stranice (`public_tours()`, `approved_clubs()`):
+Javni endpointi (`tours`, `clubs`) koriste `public_tours()` i `approved_clubs()`:
 samo objavljene ture odobrenih društava u narednih 30 dana; sve ostalo je 404. Odgovori sadrže samo
 izričito nabrojana polja (bez učesnika, kreatora i kontakata korisnika).
 
-Prijava i registracija koriste iste forme i isti backend kao HTML stranice (zaključavanje naloga,
+Prijava i registracija koriste Django forme i `LockoutEmailBackend` (zaključavanje naloga,
 generička poruka greške, validatori lozinke, audit log, isti odgovor za postojeći email).
+Nepoznate putanje i greške vraćaju JSON (`{"detail": ...}`) bez internih detalja.
 
 ## Frontend (React)
 
-Nova verzija interfejsa je u `frontend/` (React 19, TypeScript, Vite, React Router, TanStack Query).
-Za vrijeme migracije živi pod **`/novo/`**, a stare Django stranice ostaju na svojim adresama;
-obje dijele istu sesiju. Pravila dizajna i sigurnosti su u `.claude/skills/frostbite-frontend/SKILL.md`.
+Cijeli interfejs je u `frontend/` (React 19, TypeScript, Vite, React Router, TanStack Query).
+Pravila dizajna i sigurnosti su u `.claude/skills/frostbite-frontend/SKILL.md`.
 
-Lokalni razvoj (dva terminala):
-
-```bash
-cd app && .venv/bin/python manage.py runserver        # Django na :8000
-cd frontend && npm ci && npm run dev                   # React na http://localhost:5173/novo/
-```
-
-Vite prosljeđuje `/api` i stare stranice na Django, pa sve radi na istom originu (kolačići i CSRF bez CORS-a).
+Stare adrese iz Django verzije (`/nalog/prijava/`, `/nalog/profil/`, `/ture/<id>/ruta.gpx`) i adrese
+iz perioda migracije (`/novo/...`) Nginx trajno preusmjerava na nove.
 
 Interfejs ima svijetlu i tamnu temu (prekidač u zaglavlju; bez izbora prati sistem), maskotu Frosti
 i generisane crtane ilustracije planina na karticama tura i društava (`SceneArt`, isti crtež za isti ID).
@@ -230,7 +237,7 @@ i generisane crtane ilustracije planina na karticama tura i društava (`SceneArt
 | Komanda | Šta radi |
 |---|---|
 | `npm run check` | TypeScript, ESLint (sigurnosna pravila) i provjera dizajna (bez gradijenata, boje samo iz tokena) |
-| `npm test` | unit testovi (open redirect zaštita, sesija, jačina lozinke) |
+| `npm test` | unit testovi (open redirect, ID-jevi i filteri iz URL-a, sesija, formatiranje, ruta, grafikon) |
 | `npm run build` | `check` + produkcijski build bez source mapa |
 
 U Dockeru se frontend gradi u Nginx image-u (`npm ci`, pa `npm run build`); build pada ako `check` ne prođe.
@@ -255,19 +262,20 @@ Demo podaci postoje samo lokalno: `seed_demo` odbija da se pokrene u produkciji 
 ## Testovi
 
 ```bash
-cd app
-.venv/bin/python manage.py test
+cd app && .venv/bin/python manage.py test       # 108 testova API-ja
+cd frontend && npm run check && npm test         # TypeScript, ESLint, dizajn + 53 unit testa
 ```
 
-Postoji 94 automatska testa. Pored ispravnog rada provjeravaju i sigurnosna pravila:
+Pored ispravnog rada testovi provjeravaju i sigurnosna pravila:
 
-- izolaciju društava (admin jednog društva ne vidi drugo),
-- pristup ličnim podacima (samo odobreni vodič, u vremenskom prozoru),
+- izolaciju društava i IDOR (tuđe društvo, tura, prijava ili članstvo daju 404),
+- pristup ličnim podacima (samo odobreni vodič, u vremenskom prozoru, uz audit),
 - zaključavanje naloga i neotkrivanje postojanja naloga,
-- podmetanje polja u formama (mass assignment),
-- XSS u nazivima tura (mapa, GPX),
-- odsustvo umetnutog JavaScript-a (CSP),
-- otvoreno preusmjeravanje nakon prijave.
+- CSRF za svaki zahtjev koji mijenja stanje (i bez prijave),
+- podmetanje polja (mass assignment: status, društvo, uloge),
+- XSS u nazivima tura, napomenama i evidenciji (sadržaj ostaje tekst),
+- blokiranje naloga i promjenu lozinke (gašenje ostalih sesija),
+- otvoreno preusmjeravanje nakon prijave (frontend).
 
 Test koji provjerava PostgreSQL trigger za evidenciju aktivnosti preskače se lokalno (SQLite) i izvršava se na serveru.
 
@@ -281,7 +289,7 @@ Internet ── UDP 1194 ──> fb-vpn (javna podmreža, Elastic IP)
                            │  VPN klijenti vide SAMO aplikaciju na 80/443
                            ▼
                          fb-app (privatna podmreža, bez javne IP adrese)
-                            Nginx (HTTPS) -> Gunicorn -> Django -> PostgreSQL (samo localhost)
+                            Nginx (HTTPS): React aplikacija (/) i /api/ -> Gunicorn -> Django -> PostgreSQL (samo localhost)
 ```
 
 ### Prvo postavljanje (jednom)
@@ -326,7 +334,7 @@ Skripte za aplikaciju odbijaju da se pokrenu na VPN serveru, a `vpn-hardening.sh
 ./infra/deploy.sh
 ```
 
-Skripta prvo pokreće testove (ako padnu, ništa se ne postavlja), zatim kopira kod na server i pokreće `04-deploy-app.sh`: Python okruženje, migracije, statičke datoteke, systemd servis i Nginx. Zadana adresa aplikacije je `10.0.143.199`; druga se zadaje sa `APP_IP=<adresa> ./infra/deploy.sh`.
+Skripta prvo pokreće testove API-ja i frontenda i pravi React build na vašem računaru (potreban je Node.js; ako išta padne, ništa se ne postavlja), zatim kopira kod i build na server i pokreće `04-deploy-app.sh`: Python okruženje, migracije, React aplikacija, systemd servis i Nginx. Na serveru Node.js nije potreban. Zadana adresa aplikacije je `10.0.143.199`; druga se zadaje sa `APP_IP=<adresa> ./infra/deploy.sh`.
 
 Prvi put nakon postavljanja kreirajte sistemskog admina:
 
@@ -351,7 +359,8 @@ Sažetak mjera; potpuna pravila su u sigurnosnoj politici.
 - **Nalozi:** lozinke od najmanje 10 znakova uz provjeru čestih lozinki. Zaključavanje nakon 5 neuspjeha na 15 minuta, vezano za nalog, ne za IP adresu, jer svi korisnici VPN-a dijele istu adresu. Ista poruka za svaki neuspjeh prijave i isti odgovor pri registraciji postojećeg emaila. Sesija ističe nakon 30 minuta, a kolačići su `Secure`, `HttpOnly` i s prefiksom `__Host-`.
 - **Lični podaci:** telefon, hitni kontakt i zdravstvene napomene vidi samo odobreni vodič ture, najkasnije 7 dana nakon nje. Svaki pristup se bilježi.
 - **Evidencija aktivnosti:** samo dodavanje; izmjenu i brisanje blokiraju i aplikacija i PostgreSQL trigger.
-- **Web:** samo HTTPS, stroga CSP (`script-src 'self'`, bez umetnutog JavaScript-a), HSTS i zaštita od clickjackinga. Ograničenje broja zahtjeva na prijavi i registraciji.
+- **Web:** samo HTTPS, stroga CSP (`default-src 'self'`, bez umetnutog JavaScript-a), HSTS i zaštita od clickjackinga. Ograničenje broja zahtjeva na prijavi, registraciji i promjeni lozinke.
+- **Frontend:** sesija samo u `HttpOnly` kolačiću (bez tokena u pregledaču), CSRF token samo u memoriji, jedan API klijent (same-origin), ESLint zabranjuje `innerHTML`, `eval` i pohranu u pregledaču (osim izbora teme), produkcijski build bez source mapa, ovisnosti u tačnim verzijama bez install skripti.
 - **Datoteke:** aplikacija ne prima datoteke. GPX ruta se čita u pregledniku i na server se šalju samo koordinate.
 - **Server:** baza sluša samo na localhost i aplikacijski korisnik baze nije superuser. Gunicorn radi kao ograničen systemd servis, a kod je za aplikaciju samo za čitanje. SSH je dozvoljen samo ključem, a VPN klijenti vide samo aplikaciju.
 
@@ -362,5 +371,6 @@ Sažetak mjera; potpuna pravila su u sigurnosnoj politici.
 | `ssh fb-vpn` ne radi (timeout) | Lab sesija je istekla (pokrenite lab) ili se promijenila vaša javna IP adresa: u `fb-vpn-sg` za port 22 ponovo izaberite **My IP**. |
 | Server nema pristup internetu | Odlazno pravilo u sigurnosnoj grupi, ruta `0.0.0.0/0 -> fb-vpn` u privatnoj tabeli ruta i isključen source/destination check na `fb-vpn`. |
 | Mapa je siva | Pločice mape se učitavaju sa interneta; provjerite konekciju. Na serveru domeni podloga moraju biti u CSP-u (`img-src`). |
-| Promjene CSS-a se ne vide | Osvježite stranicu bez keša: `Ctrl+Shift+R`. |
-| `'ui' is not a registered tag library` | Restartujte razvojni server nakon dodavanja novih modula. |
+| Nova verzija se ne vidi | `index.html` se ne kešira, a ostale datoteke imaju hash u imenu; osvježite stranicu (`Ctrl+Shift+R`). |
+| `npm run dev`: greške u konzoli za `/api` | Django API nije pokrenut: `cd app && .venv/bin/python manage.py runserver`. |
+| Build pada na „Provjera dizajna“ | U kodu je gradijent ili boja van `tokens.css`; poruka navodi datoteku i red. |
