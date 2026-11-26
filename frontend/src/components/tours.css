@@ -1,0 +1,64 @@
+/* Kartice tura, oznake težine, popunjenost, sličica rute. */
+.diff {
+  --diff: var(--ink-3);
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--diff);
+}
+.diff-dot { width: 7px; height: 7px; border-radius: 2px; background: var(--diff); transform: rotate(45deg); }
+.diff-laka { --diff: var(--d-easy); }
+.diff-srednja { --diff: var(--d-medium); }
+.diff-teska { --diff: var(--d-hard); }
+.diff-vrlo_teska { --diff: var(--d-extreme); }
+
+.tag { padding: 2px 6px; border: 1px solid var(--line-strong); border-radius: 4px; font-size: 0.6rem; color: var(--ink-2); }
+
+.tour-card { animation: rise 380ms var(--ease) both; }
+.tour-card-link {
+  display: grid; grid-template-columns: 56px 1fr 120px; gap: 18px; align-items: center;
+  padding: 18px; border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--surface);
+  transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+.tour-card-link:hover { border-color: var(--ink); transform: translateY(-2px); }
+.tour-card-date {
+  display: grid; justify-items: center; align-content: center; gap: 2px;
+  height: 64px; border-right: 1px solid var(--line); padding-right: 14px;
+}
+.tour-card-day { font-size: 1.6rem; font-weight: 500; line-height: 1; letter-spacing: -0.03em; }
+.tour-card-date .label-mono { font-size: 0.62rem; }
+.tour-card-body { display: grid; gap: 6px; min-width: 0; }
+.tour-card-top { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.tour-card-title { font-size: 1.08rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tour-card-meta { font-size: 0.88rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tour-card-stats { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.76rem; color: var(--ink-2); margin: 2px 0; }
+
+.trace { width: 120px; height: 64px; border-left: 1px solid var(--line); padding-left: 10px; overflow: visible; }
+.trace-line {
+  fill: none; stroke: var(--ink-3); stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round;
+  stroke-dasharray: 1; stroke-dashoffset: 1;
+  animation: trace-draw 1.2s var(--ease) 200ms forwards;
+  transition: stroke var(--dur) var(--ease);
+}
+.trace-start { fill: var(--accent); }
+.trace-empty { font-family: var(--font-mono); font-size: 6px; letter-spacing: 0.12em; fill: var(--ink-3); }
+.tour-card-link:hover .trace-line { stroke: var(--accent); }
+@keyframes trace-draw { to { stroke-dashoffset: 0; } }
+
+.spots { display: flex; align-items: center; gap: 10px; }
+.spots-bar { flex: 1; max-width: 160px; height: 3px; background: var(--line); border-radius: 2px; overflow: hidden; }
+.spots-bar span {
+  display: block; height: 100%; background: var(--ink); transform-origin: left;
+  transition: transform 600ms var(--ease);
+}
+.spots-bar span.full { background: var(--warn); }
+.spots-text { font-size: 0.78rem; color: var(--ink-2); }
+
+@media (max-width: 640px) {
+  .tour-card-link { grid-template-columns: 48px 1fr; }
+  .trace { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trace-line { animation: none; stroke-dashoffset: 0; stroke-dasharray: none; }
+}

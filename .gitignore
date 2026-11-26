@@ -58,3 +58,6 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# --- Frontend (React) ----------------------------------------------------------
+frontend/dist/

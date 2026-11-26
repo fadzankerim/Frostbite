@@ -1,0 +1,69 @@
+.contour-field {
+  --cf-bg: var(--paper);
+  display: block; width: 100%; height: 100%;
+  touch-action: pan-y;
+  user-select: none;
+}
+.contour-field.is-interactive { cursor: crosshair; }
+
+.cf-grid line { stroke: var(--line); stroke-width: 1; opacity: 0.6; }
+
+.cf-ring {
+  fill: none;
+  stroke: var(--line-strong);
+  stroke-width: 1;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: cf-draw 1.8s var(--ease) forwards;
+  animation-delay: calc(var(--i) * 85ms);
+  transition: stroke 180ms var(--ease), stroke-width 180ms var(--ease);
+}
+.cf-ring.is-index { stroke: var(--ink-3); stroke-width: 1.4; }
+.cf-ring.is-active { stroke: var(--accent); stroke-width: 2; }
+
+@keyframes cf-draw { to { stroke-dashoffset: 0; } }
+
+.cf-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  fill: var(--ink-3);
+  paint-order: stroke;
+  stroke: var(--cf-bg);
+  stroke-width: 5px;
+  opacity: 0;
+  animation: cf-fade 500ms var(--ease) forwards;
+  animation-delay: calc(var(--i) * 85ms + 700ms);
+}
+@keyframes cf-fade { to { opacity: 1; } }
+
+.cf-summit path { fill: var(--accent); }
+.cf-pulse {
+  fill: none; stroke: var(--accent); stroke-width: 1;
+  transform-box: fill-box; transform-origin: center;
+  animation: cf-pulse 2.4s var(--ease) infinite;
+}
+@keyframes cf-pulse {
+  from { transform: scale(0.6); opacity: 0.9; }
+  to { transform: scale(2.6); opacity: 0; }
+}
+.cf-summit-label {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em;
+  fill: var(--ink); paint-order: stroke; stroke: var(--cf-bg); stroke-width: 5px;
+}
+
+.cf-drift { animation: cf-drift 22s ease-in-out infinite alternate; }
+@keyframes cf-drift { to { transform: translate(-8px, 5px); } }
+
+.cf-probe { pointer-events: none; }
+.cf-cross { stroke: var(--accent); stroke-width: 1; stroke-dasharray: 2 5; opacity: 0.7; }
+.cf-reticle { fill: none; stroke: var(--accent); stroke-width: 1.5; }
+.cf-readout { fill: var(--surface); stroke: var(--line-strong); }
+.cf-readout-alt { font-family: var(--font-mono); font-size: 12px; font-weight: 600; fill: var(--ink); }
+.cf-readout-pos { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.04em; fill: var(--ink-3); }
+
+@media (prefers-reduced-motion: reduce) {
+  .cf-ring { animation: none; stroke-dashoffset: 0; stroke-dasharray: none; }
+  .cf-label { animation: none; opacity: 1; }
+  .cf-drift, .cf-pulse { animation: none; }
+}

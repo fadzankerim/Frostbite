@@ -1,0 +1,99 @@
+/* Leaflet usklađen s dizajnom: tanke linije, pune boje, mono oznake. */
+.map {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 320px;
+  background: var(--paper-2);
+  font-family: var(--font-sans);
+  z-index: 0;
+}
+.map.leaflet-container { background: var(--paper-2); font: inherit; }
+.map .leaflet-tile-pane { filter: saturate(0.75) contrast(0.95); }
+@media (prefers-color-scheme: dark) {
+  .map .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) saturate(0.5) brightness(0.85) contrast(0.9); }
+}
+
+.map .leaflet-bar { border: 1px solid var(--line-strong); border-radius: var(--radius-sm); box-shadow: none; overflow: hidden; }
+.map .leaflet-bar a {
+  width: 32px; height: 32px; line-height: 32px;
+  background: var(--surface); color: var(--ink); border-bottom: 1px solid var(--line);
+  transition: background-color var(--dur) var(--ease);
+}
+.map .leaflet-bar a:hover { background: var(--paper-2); }
+.map .leaflet-control-layers {
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm); box-shadow: none;
+  background: var(--surface); color: var(--ink);
+}
+.map .leaflet-control-layers-expanded { padding: 10px 12px; font-size: 0.85rem; }
+.map .leaflet-control-scale-line {
+  border-color: var(--ink-2); background: var(--surface); color: var(--ink-2);
+  font-family: var(--font-mono); font-size: 10px;
+}
+.map .leaflet-control-attribution {
+  background: var(--surface); color: var(--ink-3);
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.02em;
+}
+.map .leaflet-control-attribution a { color: var(--ink-2); }
+
+/* Pinovi: kvadratni "reticle" u boji težine, puls na aktivnom */
+.pin-host { background: transparent; border: 0; }
+.pin {
+  --pin: var(--ink);
+  position: relative; display: grid; place-items: center;
+  width: 28px; height: 28px;
+  transition: transform var(--dur) var(--ease);
+}
+.pin::before {
+  content: ''; position: absolute; inset: 4px;
+  border: 1.5px solid var(--pin); border-radius: 4px; background: var(--surface);
+  transform: rotate(45deg);
+  transition: transform var(--dur) var(--ease);
+}
+.pin-core { position: relative; width: 6px; height: 6px; border-radius: 50%; background: var(--pin); }
+.pin-laka { --pin: var(--d-easy); }
+.pin-srednja { --pin: var(--d-medium); }
+.pin-teska { --pin: var(--d-hard); }
+.pin-vrlo_teska { --pin: var(--d-extreme); }
+.pin-start { --pin: var(--accent); }
+.pin-end { --pin: var(--ink); }
+.leaflet-marker-icon:hover .pin, .leaflet-marker-icon.is-active .pin { transform: scale(1.25); }
+.leaflet-marker-icon.is-active .pin::after {
+  content: ''; position: absolute; inset: 0; border-radius: 50%;
+  border: 1px solid var(--pin); animation: pin-pulse 1.4s var(--ease) infinite;
+}
+@keyframes pin-pulse { from { transform: scale(0.6); opacity: 1; } to { transform: scale(2.2); opacity: 0; } }
+
+/* Ruta: linija u boji akcenta s podlogom za kontrast, iscrtava se pri učitavanju */
+.route-casing { stroke: var(--surface); stroke-opacity: 0.9; fill: none; }
+.route-line {
+  stroke: var(--accent); fill: none;
+  stroke-dasharray: 1; stroke-dashoffset: 1;
+  animation: route-draw 1.8s var(--ease) 200ms forwards;
+}
+@keyframes route-draw { to { stroke-dashoffset: 0; } }
+
+/* Popup */
+.fb-popup .leaflet-popup-content-wrapper {
+  border-radius: var(--radius); border: 1px solid var(--line-strong); box-shadow: none;
+  background: var(--surface); color: var(--ink);
+}
+.fb-popup .leaflet-popup-tip { background: var(--surface); box-shadow: none; border: 1px solid var(--line-strong); }
+.fb-popup .leaflet-popup-content { margin: 14px 16px; font-size: 0.9rem; line-height: 1.4; }
+.fb-popup a.leaflet-popup-close-button { color: var(--ink-3); }
+.pop { display: grid; gap: 6px; }
+.pop-top { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.pop-badge { font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; }
+.pop-when { font-family: var(--font-mono); font-size: 0.7rem; color: var(--ink-3); }
+.pop-title { font-size: 1rem; letter-spacing: -0.01em; }
+.pop-club, .pop-spots { color: var(--ink-2); font-size: 0.82rem; }
+.fb-popup a.pop-link { color: var(--accent); font-weight: 500; margin-top: 4px; }
+.d-laka { color: var(--d-easy); }
+.d-srednja { color: var(--d-medium); }
+.d-teska { color: var(--d-hard); }
+.d-vrlo_teska { color: var(--d-extreme); }
+
+@media (prefers-reduced-motion: reduce) {
+  .route-line { animation: none; stroke-dashoffset: 0; stroke-dasharray: none; }
+  .leaflet-marker-icon.is-active .pin::after { animation: none; }
+}

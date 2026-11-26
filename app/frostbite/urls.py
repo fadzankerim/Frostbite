@@ -11,5 +11,7 @@ urlpatterns = [
     path('', include('clubs.urls')),
     path('nalog/', include('accounts.urls')),
     path('api/auth/', include('accounts.api_urls')),
+    path('api/tours/', include('tours.api_urls')),
+    path('api/clubs/', include('clubs.api_urls')),
     path('', include('panel.urls')),
 ]
