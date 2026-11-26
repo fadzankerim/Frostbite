@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
+import type { MyBadge } from '../api/badges';
+import { groupByRole, progressRatio, tierPoints, unseen } from './badges';
+import { cycle, keyToIndex } from './nav';
 import { passwordStrength } from './passwordStrength';
 import { safeNext } from './safeNext';
 import { formatClock, secondsLeft } from './session';
@@ -129,4 +132,49 @@ describe('početna stranica po ulozi', async () => {
     [{ systemAdmin: false, clubAdmin: false, guide: true }, '/vodic'],
     [{ systemAdmin: false, clubAdmin: false, guide: false }, '/'],
   ])('%o -> %s', (roles, path) => expect(landingFor(roles)).toBe(path));
+});
+
+describe('bedževi', () => {
+  const b = (code: string, role: MyBadge['role'], earned = false, seen = true): MyBadge => ({
+    code, name: code, description: '', role, tier: 1, icon: 'peak', earned, seen, awardedAt: null, progress: 0, goal: 1,
+  });
+
+  it('grupiše po ulozi stalnim redoslijedom i izostavlja prazne', () => {
+    const g = groupByRole([b('s', 'SISTEM'), b('p', 'PLANINAR'), b('p2', 'PLANINAR')]);
+    expect(g.map((x) => [x.role, x.badges.length])).toEqual([['PLANINAR', 2], ['SISTEM', 1]]);
+  });
+
+  it('novi su samo osvojeni a neviđeni', () => {
+    expect(unseen([b('a', 'PLANINAR', true, false), b('b', 'PLANINAR', true, true), b('c', 'PLANINAR', false, false)])
+      .map((x) => x.code)).toEqual(['a']);
+    expect(unseen(undefined)).toEqual([]);
+  });
+
+  it('napredak je u opsegu 0..1', () => {
+    expect(progressRatio(3, 5)).toBe(0.6);
+    expect(progressRatio(9, 5)).toBe(1);
+    expect(progressRatio(-1, 5)).toBe(0);
+    expect(progressRatio(1, 0)).toBe(0);
+  });
+
+  it('obris po nivou', () => {
+    expect(tierPoints(1, 0, 0, 10)).toBeNull();
+    expect(tierPoints(2, 0, 0, 10)?.split(' ')).toHaveLength(6);
+    expect(tierPoints(3, 0, 0, 10)?.split(' ')).toHaveLength(24);
+  });
+});
+
+describe('navigacija koraka', () => {
+  it('kružno pomjeranje', () => {
+    expect(cycle(3, 1, 4)).toBe(0);
+    expect(cycle(0, -1, 4)).toBe(3);
+    expect(cycle(1, 1, 0)).toBe(0);
+  });
+  it('tipke', () => {
+    expect(keyToIndex('ArrowRight', 2, 3)).toBe(0);
+    expect(keyToIndex('ArrowLeft', 0, 3)).toBe(2);
+    expect(keyToIndex('Home', 2, 3)).toBe(0);
+    expect(keyToIndex('End', 0, 3)).toBe(2);
+    expect(keyToIndex('a', 0, 3)).toBeNull();
+  });
 });

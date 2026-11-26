@@ -50,6 +50,17 @@
   --d-hard: #e0452b;
   --d-extreme: #7a2bd9;
 
+  /* bedževi: nivo (bronza, srebro, zlato) i boja uloge */
+  --badge-bronze: #e09a62;
+  --badge-silver: #c9d3de;
+  --badge-gold: #ffc23d;
+  --badge-hiker: #4fb3ff;
+  --badge-guide: #2ec98a;
+  --badge-club: #8f7bff;
+  --badge-system: #ff6b5b;
+  --badge-locked: #d9dcd6;
+  --badge-locked-ink: #a3a9ad;
+
   --radius: 8px;
   --radius-sm: 6px;
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
@@ -92,6 +103,15 @@
   --d-extreme: #b98bff;
   --chart-1: #6688f5;
   --chart-2: #33a877;
+  --badge-bronze: #d08c55;
+  --badge-silver: #aab6c3;
+  --badge-gold: #ffcf5c;
+  --badge-hiker: #6fc3ff;
+  --badge-guide: #4fe0a4;
+  --badge-club: #a596ff;
+  --badge-system: #ff8173;
+  --badge-locked: #2a3134;
+  --badge-locked-ink: #586065;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -128,6 +148,15 @@
     --d-extreme: #b98bff;
     --chart-1: #6688f5;
     --chart-2: #33a877;
+    --badge-bronze: #d08c55;
+    --badge-silver: #aab6c3;
+    --badge-gold: #ffcf5c;
+    --badge-hiker: #6fc3ff;
+    --badge-guide: #4fe0a4;
+    --badge-club: #a596ff;
+    --badge-system: #ff8173;
+    --badge-locked: #2a3134;
+    --badge-locked-ink: #586065;
   }
 }
 

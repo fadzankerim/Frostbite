@@ -13,6 +13,9 @@ from django.utils import timezone
 
 from accounts.permissions import guide_clubs
 from audit.log import audit
+from badges import rules as badge_events
+from badges.rules import club_admin_users
+from badges.services import notify as notify_badges
 from tours.models import Tour, TourGuide, TourRegistration, TourReport
 
 from .forms import ReportForm
@@ -119,6 +122,9 @@ def save_attendance(request, pk, present_ids):
             r.save(update_fields=['attendance', 'updated_at'])
     count = len(present_ids & {r.pk for r in regs})
     audit(request, 'TURA_PRISUSTVO', 'tour', tour.pk, details=f'prisutno={count}')
+    present = [r.user for r in TourRegistration.objects.filter(
+        tour=tour, attendance=TourRegistration.Attendance.PRESENT).select_related('user')]
+    notify_badges(badge_events.ATTENDANCE, [*present, *club_admin_users(tour.club)])
     return count
 
 
@@ -140,4 +146,5 @@ def save_report(request, pk, data):
         tour.status = Tour.Status.DONE
         tour.save(update_fields=['status', 'updated_at'])
     audit(request, 'TURA_IZVJESTAJ', 'tour', tour.pk)
+    notify_badges(badge_events.REPORT, [request.user])
     return rep

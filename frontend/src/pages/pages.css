@@ -500,3 +500,31 @@ a.mini-row:hover { border-color: var(--fun-ink); }
 .audit-details { max-width: 320px; overflow-wrap: anywhere; color: var(--ink-2); }
 .nowrap { white-space: nowrap; }
 .event-row .audit-chip { justify-self: start; }
+
+/* --- Početna: sekcije ------------------------------------------------------ */
+.home-section { padding-top: 48px; padding-bottom: 8px; }
+.home-section:last-child { padding-bottom: 88px; }
+.section-lead { margin: -6px 0 16px; max-width: 60ch; }
+.stats-list:has(> :nth-child(5)) { grid-template-columns: repeat(5, 1fr); }
+.stats-list .peak:nth-child(5) { border-top: 3px solid var(--fun-sky); }
+@media (max-width: 900px) { .stats-list:has(> :nth-child(5)) { grid-template-columns: repeat(2, 1fr); } }
+
+.mini-map { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: 24px; align-items: stretch; }
+.mini-map-side { display: grid; gap: 12px; align-content: center; }
+.mini-map-frame { min-height: 340px; display: flex; flex-direction: column; }
+.mini-map-frame .frame-map { min-height: 340px; }
+@media (max-width: 900px) { .mini-map { grid-template-columns: 1fr; } }
+
+.challenge {
+  display: grid; grid-template-columns: auto 1fr auto; gap: 20px; align-items: center; padding: 22px 24px;
+  border: 1.5px solid var(--fun-ink); border-radius: calc(var(--radius) + 6px); background: var(--fun-paper);
+  box-shadow: 4px 4px 0 var(--fun-ink);
+}
+.challenge-copy { display: grid; gap: 6px; }
+.challenge-copy h2 { font-size: clamp(1.25rem, 3vw, 1.6rem); }
+.challenge-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.challenge-badge { transform: rotate(-8deg); transition: transform 400ms var(--ease-bounce); }
+.challenge:hover .challenge-badge { transform: rotate(6deg) scale(1.06); }
+@media (max-width: 760px) { .challenge { grid-template-columns: 1fr; justify-items: start; } }
+
+.faq-head { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }

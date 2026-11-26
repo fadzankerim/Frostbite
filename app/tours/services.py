@@ -8,6 +8,9 @@ from django.db.models import Q
 from django.utils import timezone
 
 from audit.log import audit
+from badges import rules as badge_events
+from badges.rules import club_admin_users
+from badges.services import notify as notify_badges
 from clubs.models import Club, ClubMembership
 
 from .models import Tour, TourGuide, TourRegistration
@@ -56,6 +59,7 @@ def register(request, tour_id):
             raise RegistrationError('Već ste prijavljeni na ovu turu.')
 
     audit(request, 'TURA_PRIJAVA', 'tour_registration', reg.pk, details=f'tura={tour.pk} status={status}')
+    notify_badges(badge_events.REGISTRATION, [user, *club_admin_users(tour.club)])
     return reg
 
 
@@ -89,4 +93,5 @@ def cancel(request, registration_id):
     if promoted:
         audit(request, 'TURA_SA_LISTE_CEKANJA', 'tour_registration', promoted.pk, user=promoted.user,
               details=f'tura={tour.pk}')
+        notify_badges(badge_events.REGISTRATION, club_admin_users(tour.club))
     return reg

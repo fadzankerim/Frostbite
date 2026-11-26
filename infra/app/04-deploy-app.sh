@@ -86,6 +86,7 @@ install -d -o "$APP_USER" -g "$APP_USER" -m 750 /var/log/frostbite
 # --- Baza -------------------------------------------------------------------
 frostbite-manage check --deploy --fail-level ERROR
 frostbite-manage migrate --noinput
+frostbite-manage badges_backfill          # idempotentno: bedževi za postojeću istoriju
 frostbite-manage clearsessions
 
 # --- systemd: socket + servis ----------------------------------------------

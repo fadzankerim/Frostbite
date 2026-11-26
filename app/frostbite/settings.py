@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'tours',
     'audit',
     'panel',
+    'badges',
 ]
 
 MIDDLEWARE = [

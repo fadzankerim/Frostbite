@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router';
 
 import { displayName, useLogout, useMe, type User } from '../api/auth';
 import { useSelection } from '../api/hiker';
+import { BadgeNotifier } from './Badges';
 import { SessionIndicator } from './SessionIndicator';
 import { ThemeToggle } from './ThemeToggle';
 import './layout.css';
@@ -151,10 +152,12 @@ function Header() {
 
 export function Layout() {
   const location = useLocation();
+  const { data: me } = useMe();
   return (
     <>
       <a className="skip-link" href="#main">Preskoči na sadržaj</a>
       <Header />
+      {me?.authenticated && <BadgeNotifier key={me.user.id} />}
       <main id="main" key={location.pathname} className="site-main page-enter">
         <Outlet />
       </main>
