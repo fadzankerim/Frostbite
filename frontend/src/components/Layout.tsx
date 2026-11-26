@@ -67,8 +67,8 @@ function Header() {
 
         <nav id="site-nav" className={`site-nav${open ? ' is-open' : ''}`} aria-label="Glavni meni">
           <div className="nav-group">
-            <Legacy href="/ture/">Ture</Legacy>
-            <Legacy href="/drustva/">Društva</Legacy>
+            <NavLink to="/ture" className="nav-link">Ture</NavLink>
+            <NavLink to="/drustva" className="nav-link">Društva</NavLink>
             {user?.roles.guide && <Legacy href="/vodic/">Vođenje</Legacy>}
             {user?.roles.clubAdmin && <Legacy href="/upravljanje/">Upravljanje</Legacy>}
             {user?.roles.systemAdmin && <Legacy href="/sistem/">Sistem</Legacy>}

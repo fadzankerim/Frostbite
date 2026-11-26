@@ -20,6 +20,12 @@
   --ok-soft: #dff3ea;
   --warn: #b26b00;
 
+  /* težina ture (pune boje, bez gradijenata) */
+  --d-easy: #17885a;
+  --d-medium: #b26b00;
+  --d-hard: #d23a1f;
+  --d-extreme: #7a2bd9;
+
   --radius: 8px;
   --radius-sm: 6px;
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
@@ -46,5 +52,9 @@
     --ok: #4fd29a;
     --ok-soft: #0f2a1e;
     --warn: #f0a63a;
+    --d-easy: #4fd29a;
+    --d-medium: #f0a63a;
+    --d-hard: #ff7a5c;
+    --d-extreme: #b98bff;
   }
 }

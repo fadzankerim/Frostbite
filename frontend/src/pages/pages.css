@@ -124,3 +124,112 @@
 }
 .error-root { min-height: 100vh; display: flex; }
 .status-map .cf-summit-label { display: none; }
+
+/* --- Zajedničko -------------------------------------------------------------- */
+.back { display: inline-block; margin-bottom: 8px; color: var(--ink-2); transition: color var(--dur) var(--ease), transform var(--dur) var(--ease); }
+.back:hover { color: var(--ink); transform: translateX(-3px); }
+.page-lead { max-width: 60ch; }
+.section-title { margin-top: 32px; font-size: 1.3rem; }
+.section-head { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; margin-bottom: 16px; }
+.prose { white-space: pre-line; overflow-wrap: anywhere; max-width: 68ch; color: var(--ink-2); }
+.tag-accent { border-color: var(--accent); color: var(--accent); }
+.tour-list { display: grid; gap: 12px; transition: opacity var(--dur) var(--ease); }
+.tour-list.is-refreshing { opacity: 0.55; }
+.list-note { margin-top: 12px; }
+.empty { padding: 40px 20px; border: 1px dashed var(--line-strong); border-radius: var(--radius); text-align: center; display: grid; gap: 8px; }
+
+.skeleton {
+  height: 102px; border-radius: var(--radius); background: var(--paper-2);
+  border: 1px solid var(--line); animation: shimmer 1.4s ease-in-out infinite;
+}
+.skeleton-sm { height: 56px; }
+@keyframes shimmer { 50% { opacity: 0.45; } }
+
+.stats-list { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 900px) { .stats-list { grid-template-columns: repeat(2, 1fr); } }
+.featured { padding-top: 32px; padding-bottom: 16px; }
+
+/* --- Lista tura: lista lijevo, mapa desno ------------------------------------ */
+.tours-page {
+  width: 100%; max-width: 1440px; margin: 0 auto; padding: 32px 20px 64px;
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px;
+}
+.tours-list-col { display: grid; gap: 20px; align-content: start; }
+.tours-head { display: grid; gap: 6px; }
+.tours-map-sticky { position: sticky; top: calc(var(--header-h) + 20px); height: calc(100vh - var(--header-h) - 40px); }
+@media (max-width: 1000px) {
+  .tours-page { grid-template-columns: 1fr; }
+  .tours-map-col { order: -1; }
+  .tours-map-sticky { position: relative; top: 0; height: 360px; }
+}
+
+.filters { display: grid; gap: 14px; padding: 16px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.filters .btn { justify-self: start; }
+.filter-row { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 12px; }
+@media (max-width: 560px) { .filter-row { grid-template-columns: 1fr; } }
+select.input { appearance: none; padding-right: 32px; background-color: var(--surface); cursor: pointer; }
+.chips-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip-btn {
+  --diff: var(--ink-3);
+  display: inline-flex; align-items: center; gap: 7px;
+  height: 32px; padding: 0 12px; border: 1px solid var(--line-strong); border-radius: 999px;
+  background: transparent; color: var(--ink-2); font: inherit; font-size: 0.85rem; cursor: pointer;
+  transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease), background-color var(--dur) var(--ease);
+}
+.chip-btn:hover { border-color: var(--ink); color: var(--ink); }
+.chip-btn.is-on { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+.chip-btn .diff-dot { width: 7px; height: 7px; border-radius: 2px; transform: rotate(45deg); background: var(--diff); }
+.chip-laka { --diff: var(--d-easy); }
+.chip-srednja { --diff: var(--d-medium); }
+.chip-teska { --diff: var(--d-hard); }
+.chip-vrlo_teska { --diff: var(--d-extreme); }
+
+/* --- Detalji ture -------------------------------------------------------------- */
+.detail-page { padding-top: 28px; padding-bottom: 88px; }
+.detail-head { display: grid; gap: 10px; margin-bottom: 24px; }
+.detail-badges { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.detail-title { font-size: clamp(2rem, 5vw, 3.2rem); max-width: 22ch; overflow-wrap: anywhere; }
+.detail-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 32px; align-items: start; }
+@media (max-width: 960px) { .detail-grid { grid-template-columns: 1fr; } }
+.detail-main { display: grid; gap: 24px; }
+.detail-map { height: 440px; }
+.map-empty { height: 100%; display: grid; place-items: center; background: var(--paper-2); }
+
+.gps {
+  display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;
+  padding: 16px 18px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface);
+}
+.gps-coords { font-size: 1.15rem; margin-top: 4px; }
+.gps-meta { font-size: 0.85rem; }
+.gps-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.stat-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.stat-grid li { display: grid; gap: 8px; padding: 16px 0 0; border-top: 1px solid var(--ink); }
+.stat-grid .altitude { font-size: clamp(1.5rem, 3vw, 2rem); }
+.stat-grid .price { font-size: clamp(1.1rem, 2.4vw, 1.4rem); line-height: 1.4; }
+@media (max-width: 640px) { .stat-grid { grid-template-columns: repeat(2, 1fr); } }
+
+.prose-block { display: grid; gap: 10px; }
+.prose-block h2 { font-size: 1.2rem; }
+
+.detail-side { position: sticky; top: calc(var(--header-h) + 20px); }
+.side-card { display: grid; gap: 16px; padding: 20px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.facts { margin: 0; display: grid; gap: 14px; }
+.facts > div { display: grid; gap: 2px; }
+.facts dd { margin: 0; font-size: 0.95rem; }
+.side-card .spots-bar { max-width: none; }
+
+/* --- Društva -------------------------------------------------------------------- */
+.club-grid { list-style: none; margin: 16px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.club-card { animation: rise 380ms var(--ease) both; }
+.club-card-link {
+  height: 100%; display: grid; gap: 8px; align-content: start;
+  padding: 22px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface);
+  transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+.club-card-link:hover { border-color: var(--ink); transform: translateY(-2px); }
+.club-desc { font-size: 0.9rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.club-count { margin-top: 8px; display: inline-flex; align-items: baseline; gap: 6px; font-size: 0.85rem; color: var(--ink-2); }
+.club-count-n { font-size: 1.4rem; color: var(--ink); }
+.club-count .arrow { margin-left: auto; transition: transform var(--dur) var(--ease); }
+.club-card-link:hover .arrow { transform: translateX(3px); }

@@ -63,7 +63,7 @@
 .cf-readout-pos { font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.04em; fill: var(--ink-3); }
 
 @media (prefers-reduced-motion: reduce) {
-  .cf-ring { animation: none; stroke-dashoffset: 0; }
+  .cf-ring { animation: none; stroke-dashoffset: 0; stroke-dasharray: none; }
   .cf-label { animation: none; opacity: 1; }
   .cf-drift, .cf-pulse { animation: none; }
 }

@@ -54,8 +54,9 @@ async function ensureCsrfToken(): Promise<string> {
 }
 
 async function request<T>(method: Method, path: string, body?: unknown, retried = false): Promise<T> {
-  if (!path.startsWith('/api/') || path.includes('..') || path.includes('//')) {
-    throw new Error(`Nedozvoljena API putanja: ${path}`);
+  const pathname = path.split('?')[0] ?? '';
+  if (!pathname.startsWith('/api/') || pathname.includes('..') || pathname.includes('//') || pathname.includes('\\')) {
+    throw new Error('Nedozvoljena API putanja.');
   }
   const unsafe = method !== 'GET';
   const headers: Record<string, string> = { Accept: 'application/json' };

@@ -3,6 +3,7 @@
 // Čisto ukrasno (aria-hidden); poštuje prefers-reduced-motion kroz CSS.
 import { useMemo, useRef, useState, type CSSProperties, type PointerEvent } from 'react';
 
+import { clearDash } from '../lib/svg';
 import './contour.css';
 
 export type Summit = { name: string; elevation: number; lat: number; lon: number };
@@ -152,6 +153,7 @@ export function ContourField({ summit = BJELASNICA, seed = 7, center = [320, 290
             pathLength={1}
             className={`cf-ring${i % 5 === 0 ? ' is-index' : ''}${probe?.ring === i ? ' is-active' : ''}`}
             style={{ '--i': i } as CSSProperties}
+            onAnimationEnd={clearDash}
           />
         ))}
         {rings.filter(({ i }) => i % 2 === 0 && i > 0).map(({ i, elevation }) => {

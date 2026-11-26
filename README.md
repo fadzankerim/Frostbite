@@ -164,6 +164,15 @@ osim endpointa koji to izričito dozvoljavaju.
 | POST | `/api/auth/login/` | `{"email", "password"}` → podaci korisnika i **novi** `csrfToken` |
 | POST | `/api/auth/logout/` | 204, sesija se briše |
 | POST | `/api/auth/register/` | `{"email", "firstName", "lastName", "phone", "password", "passwordConfirm"}` → 201 |
+| GET | `/api/tours/` | javne ture (`?q, difficulty, club, date_from, date_to`; neispravan filter → 400) |
+| GET | `/api/tours/<id>/` | detalji javne ture (ruta, vodiči samo imenom, vlastita prijava) |
+| GET | `/api/tours/filters/` | težine i odobrena društva za filtere |
+| GET | `/api/tours/stats/` | zbirne brojke za početnu |
+| GET | `/api/clubs/`, `/api/clubs/<id>/` | odobrena društva, javni profil i njihove ture |
+
+Javni endpointi (`tours`, `clubs`) koriste iste upite kao HTML stranice (`public_tours()`, `approved_clubs()`):
+samo objavljene ture odobrenih društava u narednih 30 dana; sve ostalo je 404. Odgovori sadrže samo
+izričito nabrojana polja (bez učesnika, kreatora i kontakata korisnika).
 
 Prijava i registracija koriste iste forme i isti backend kao HTML stranice (zaključavanje naloga,
 generička poruka greške, validatori lozinke, audit log, isti odgovor za postojeći email).
