@@ -35,6 +35,8 @@ export type TourDetail = TourSummary & {
   myRegistration: { id: number; status: 'PRIJAVLJEN' | 'NA_LISTI_CEKANJA'; label: string } | null;
   inSelection: boolean;
   canRegister: boolean;
+  /** tura samo za članove, a prijavljeni korisnik nema važeće članstvo */
+  membersOnlyBlocked: boolean;
 };
 
 export type TourFilters = { q?: string; difficulty?: string; club?: string; date_from?: string; date_to?: string };

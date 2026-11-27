@@ -1,8 +1,11 @@
 """Testovi auth API-ja (/api/auth/). Svi zahtjevi idu sa uključenom CSRF provjerom,
 kao iz pravog pregledača."""
 import json
+import os
 from datetime import timedelta
+from unittest import mock
 
+from django.core.management import CommandError, call_command
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
@@ -237,3 +240,20 @@ class RegisterApiTests(ApiClientMixin, TestCase):
     def test_cannot_register_as_system_admin(self):
         self.register(is_system_admin=True, isSystemAdmin=True, is_active=True)
         self.assertFalse(User.objects.get().is_system_admin)
+
+
+
+class SeedE2ETests(TestCase):
+    """seed_e2e smije raditi samo u izolovanom E2E okruženju (nikad nad pravom bazom)."""
+
+    def test_refuses_without_env(self):
+        env = {k: v for k, v in os.environ.items() if k != 'FROSTBITE_E2E'}
+        with mock.patch.dict(os.environ, env, clear=True):
+            with self.assertRaisesMessage(CommandError, 'FROSTBITE_E2E=1'):
+                call_command('seed_e2e')
+
+    def test_refuses_non_e2e_database(self):
+        with mock.patch.dict(os.environ, {'FROSTBITE_E2E': '1'}):
+            with self.assertRaisesMessage(CommandError, '_e2e'):
+                call_command('seed_e2e')
+        self.assertFalse(User.objects.exists())

@@ -133,4 +133,8 @@ class TourDetailView(ApiView):
             'inSelection': tour.pk in _selection(request._request),
             # sistemski admin se ne prijavljuje na ture (F09-F14); server to ionako provjerava
             'canRegister': not (user.is_authenticated and user.is_system_admin),
+            # tura samo za članove, a prijavljeni korisnik nema važeće članstvo: umjesto dugmeta
+            # za prijavu prikazuje se objašnjenje (register() to ionako odbija)
+            'membersOnlyBlocked': bool(tour.members_only and user.is_authenticated and not user.is_system_admin
+                                       and not services.has_valid_membership(user, tour.club)),
         })

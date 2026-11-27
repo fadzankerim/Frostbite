@@ -7,9 +7,10 @@
     "dev": "vite",
     "build": "npm run check && vite build",
     "preview": "vite preview",
-    "check": "tsc --noEmit && eslint . && npm run check:design",
+    "check": "tsc --noEmit && tsc --noEmit -p e2e && eslint . && npm run check:design",
     "check:design": "node scripts/check-design.mjs",
-    "test": "vitest run"
+    "test": "vitest run",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "@fontsource-variable/geist": "5.3.0",
@@ -22,6 +23,7 @@
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
+    "@playwright/test": "1.65.0",
     "@types/leaflet": "1.9.22",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",

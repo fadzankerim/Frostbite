@@ -1,0 +1,5 @@
+
+# E2E (Playwright)
+e2e/.auth/
+e2e-report/
+e2e-results/
