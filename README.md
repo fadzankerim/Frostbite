@@ -260,7 +260,33 @@ Komanda `seed_demo` kreira sljedeće naloge. Lozinka za sve je `Demo-Lozinka-202
 | `planinar1@primjer.ba` | planinar, član PD Bjelašnica |
 | `planinar2@primjer.ba` | planinar |
 
-Demo podaci postoje samo lokalno: `seed_demo` odbija da se pokrene u produkciji i na PostgreSQL bazi. Nalozi za recenzente na serveru kreiraju se posebno, sa jakim lozinkama.
+Demo podaci postoje samo lokalno: `seed_demo` odbija da se pokrene u produkciji i na PostgreSQL bazi.
+
+### Nalozi za recenzente (server)
+
+Politika (poglavlje 5.2) predviđa naloge za sve grupe korisnika i ture u svim statusima. Na serveru
+ih kreira komanda `seed_review`, **jednom**, nad bazom bez korisničkih podataka (ranije kreirani
+sistemski admini su dozvoljeni):
+
+```bash
+ssh fb-app 'sudo frostbite-manage seed_review --potvrdi'
+```
+
+| Nalog | Uloga |
+|---|---|
+| `sistem@frostbite.test` | sistemski admin |
+| `admin.alfa@frostbite.test`, `admin.beta@frostbite.test` | admin društva PD Alfa (test) i PD Beta (test) |
+| `vodic1.alfa`, `vodic2.alfa`, `vodic1.beta`, `vodic2.beta` `@frostbite.test` | po dva vodiča u svakom društvu |
+| `planinar1@frostbite.test` | planinar, član PD Alfa, ima zdravstvenu napomenu (testni podatak) |
+| `planinar2@frostbite.test` | planinar, zahtjev za članstvo u PD Alfa čeka odluku |
+| `planinar3@frostbite.test` | planinar, član PD Beta, podnio zahtjev za registraciju PD Gama |
+
+Svaki nalog dobija vlastitu nasumičnu lozinku od 20 znakova. Lozinke se **ispišu samo jednom** i
+nigdje se ne čuvaju (u bazi je samo hash), pa ispis treba odmah sačuvati van servera (npr. u
+`users.txt`, koji je u `.gitignore`) i predati recenzentima. Ture pokrivaju sve statuse: nacrt,
+objavljena (i samo za članove, i popunjena s listom čekanja), prijave zatvorene (jučerašnja tura,
+za evidenciju prisustva), održana (s izvještajem) i otkazana. Domen `.test` i nazivi društava su
+izmišljeni, da se ne mogu zamijeniti sa stvarnim osobama ili društvima.
 
 ## Testovi
 

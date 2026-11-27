@@ -1,5 +1,6 @@
 """Testovi auth API-ja (/api/auth/). Svi zahtjevi idu sa uključenom CSRF provjerom,
 kao iz pravog pregledača."""
+import io
 import json
 import os
 from datetime import timedelta
@@ -257,3 +258,48 @@ class SeedE2ETests(TestCase):
             with self.assertRaisesMessage(CommandError, '_e2e'):
                 call_command('seed_e2e')
         self.assertFalse(User.objects.exists())
+
+
+class SeedReviewTests(TestCase):
+    """seed_review: nalozi i podaci iz politike 5.2, jake jedinstvene lozinke, samo nad praznom bazom."""
+
+    def run_seed(self, *args):
+        out = io.StringIO()
+        call_command('seed_review', *args, stdout=out)
+        return out.getvalue()
+
+    def test_requires_confirmation_and_empty_database(self):
+        with self.assertRaisesMessage(CommandError, '--potvrdi'):
+            self.run_seed()
+        User.objects.create_system_admin('postojeci@frostbite.ba', 'Snijeg-Na-Bjelasnici-42', first_name='S', last_name='A')
+        self.run_seed('--potvrdi')                                   # postojeći sistemski admin je dozvoljen
+        with self.assertRaisesMessage(CommandError, 'praznom bazom'):
+            self.run_seed('--potvrdi')
+
+    def test_accounts_roles_and_tours_from_policy(self):
+        from clubs.models import ClubAdmin, ClubGuide
+        from tours.models import Tour
+        from accounts.permissions import admin_clubs, guide_clubs
+        out = self.run_seed('--potvrdi')
+        users = User.objects.filter(email__endswith='@frostbite.test')
+        self.assertEqual(users.filter(is_system_admin=True).count(), 1)
+        approved = Club.objects.filter(status=Club.Status.APPROVED)
+        self.assertEqual(approved.count(), 2)
+        self.assertEqual(ClubAdmin.objects.filter(club__in=approved).values('user').distinct().count(), 2)
+        for club in approved:
+            self.assertEqual(ClubGuide.objects.filter(club=club, is_active=True).count(), 2)
+        hikers = [u for u in users if not u.is_system_admin and not admin_clubs(u).exists() and not guide_clubs(u).exists()]
+        self.assertEqual(len(hikers), 3)
+        self.assertEqual(set(Tour.objects.values_list('status', flat=True)), {s for s, _ in Tour.Status.choices})
+        self.assertTrue(Club.objects.filter(status=Club.Status.PENDING).exists())
+
+        # lozinke: ispisane, jedinstvene, rade za prijavu, nisu u evidenciji
+        pairs = [line.split()[:2] for line in out.splitlines() if '@frostbite.test' in line]
+        self.assertEqual(len(pairs), users.count())
+        self.assertEqual(len({pw for _, pw in pairs}), len(pairs))
+        for email, pw in pairs:
+            self.assertGreaterEqual(len(pw), 16)
+            self.assertTrue(User.objects.get(email=email).check_password(pw))
+        details = ' '.join(AuditLog.objects.values_list('details', flat=True))
+        for _, pw in pairs:
+            self.assertNotIn(pw, details)
