@@ -19,6 +19,7 @@ from audit.log import audit
 from badges import rules as badge_events
 from badges.rules import club_admin_users
 from badges.services import notify as notify_badges
+from notifications import events as notifications
 from audit.models import AuditLog
 from clubs.models import Club
 
@@ -58,6 +59,8 @@ def decide_club(request, pk, action):
             raise AdminActionError('Ova promjena statusa nije dozvoljena.')
         club.status = new
         club.save(update_fields=['status'])
+        if action in ('approve', 'reject'):
+            notifications.club_decided(club, approved=action == 'approve')
     audit(request, audit_action, 'club', club.pk)
     if action in ('approve', 'reject'):
         notify_badges(badge_events.CLUB_DECISION, [request.user, *club_admin_users(club)])
@@ -88,6 +91,7 @@ def toggle_user(request, pk):
     target.save(update_fields=['is_active'])
     if not target.is_active:
         kill_sessions(target)
+        notifications.account_blocked(target)
     audit(request, 'NALOG_DEBLOKIRAN' if target.is_active else 'NALOG_BLOKIRAN', 'user', target.pk)
     return target
 

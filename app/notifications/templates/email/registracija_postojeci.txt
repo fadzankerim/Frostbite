@@ -1,0 +1,4 @@
+{% extends "email/base.txt" %}{% block body %}Neko je pokušao registrovati novi Frostbite nalog s vašom email adresom. Nalog nije kreiran, a vaš nalog nije mijenjan.
+
+Ako ste to bili vi, prijavite se postojećim nalogom: {{ url }}
+Ako ste zaboravili lozinku, obratite se administratoru sistema.{% endblock %}

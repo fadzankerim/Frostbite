@@ -1,0 +1,6 @@
+{% extends "email/base.txt" %}{% block body %}Društvo {{ club }} je izmijenilo turu „{{ tour }}“.
+
+Novi polazak: {{ start }}
+Mjesto okupljanja: {{ meeting_point }}
+
+Detalji ture: {{ url }}{% endblock %}

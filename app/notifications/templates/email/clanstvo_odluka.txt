@@ -1,0 +1,3 @@
+{% extends "email/base.txt" %}{% block body %}{% if approved %}Zahtjev za članstvo u društvu {{ club }} je odobren.{% else %}Zahtjev za članstvo u društvu {{ club }} nije odobren.{% endif %}
+
+Vaša članstva: {{ url }}{% endblock %}

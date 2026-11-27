@@ -18,6 +18,7 @@ from audit.log import audit
 from badges import rules as badge_events
 from badges.rules import club_admin_users
 from badges.services import notify as notify_badges
+from notifications import events as notifications
 from clubs.models import ClubGuide, ClubMembership
 from tours.models import Tour, TourGuide, TourRegistration
 
@@ -162,7 +163,9 @@ def edit_tour(request, club, pk, form):
         locked = club_tour(club, pk, lock=True)
         if locked.status not in EDITABLE:
             raise ClubError('Tura je u međuvremenu promijenila status.')
-        form.save()
+        tour = form.save()
+        if tour.status != Tour.Status.DRAFT and {'start_at', 'meeting_point'} & set(form.changed_data):
+            notifications.tour_changed(tour)
     audit(request, 'TURA_IZMJENA', 'tour', pk)
 
 
@@ -179,6 +182,10 @@ def transition(request, club, pk, action):
             raise ClubError('Rok prijave je prošao. Izmijenite turu prije objave.')
         tour.status = new
         tour.save(update_fields=['status', 'updated_at'])
+        if action == 'publish':
+            notifications.tour_published(tour)
+        elif action == 'cancel':
+            notifications.tour_cancelled(tour)
     audit(request, audit_action, 'tour', tour.pk)
     if action == 'publish':
         notify_badges(badge_events.PUBLISH, club_admin_users(club))
@@ -221,6 +228,7 @@ def assign_guide(request, club, pk, guide_pk):
             raise ClubError('Vodič je prijavljen kao učesnik ove ture.')
         tg, _ = TourGuide.objects.update_or_create(
             tour=tour, user=guide.user, defaults={'status': TourGuide.Status.APPROVED, 'decided_at': timezone.now()})
+        notifications.guide_assigned(tg)
     audit(request, 'VODIC_DODIJELJEN', 'tour_guide', tg.pk, details=f'tura={tour.pk}')
     return f'{guide.user.get_full_name()} je dodijeljen kao vodič ture.'
 
@@ -240,7 +248,9 @@ def decide_guide(request, club, pk, app_pk, decision):
     else:
         app.status = TourGuide.Status.REJECTED
     app.decided_at = timezone.now()
-    app.save(update_fields=['status', 'decided_at'])
+    with transaction.atomic():
+        app.save(update_fields=['status', 'decided_at'])
+        notifications.guide_decided(app)
     audit(request, 'VODIC_ODOBREN' if decision == 'approve' else 'VODIC_ODBIJEN', 'tour_guide', app.pk,
           details=f'tura={tour.pk}')
 
@@ -268,6 +278,7 @@ def decide_membership(request, club, pk, decision):
             m.status = ClubMembership.Status.REJECTED
         m.decided_by, m.decided_at = request.user, timezone.now()
         m.save(update_fields=['status', 'valid_until', 'decided_by', 'decided_at'])
+        notifications.membership_decided(m)
     audit(request, 'CLANSTVO_ODOBRENO' if decision == 'approve' else 'CLANSTVO_ODBIJENO', 'club_membership', m.pk)
     if decision == 'approve':
         notify_badges(badge_events.MEMBERSHIP, [m.user])

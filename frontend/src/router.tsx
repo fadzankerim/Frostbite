@@ -14,6 +14,7 @@ import { SystemAuditTab, SystemClubsTab, SystemDashboardTab, SystemLayout, Syste
 import { MyMembershipsPage, MyRegistrationsPage, SelectionPage } from './pages/HikerPages';
 import { HomePage } from './pages/HomePage';
 import { ProfilePage } from './pages/ProfilePage';
+import { UnsubscribePage } from './pages/UnsubscribePage';
 import { ErrorPage, ForbiddenPage, NotFoundPage } from './pages/StatusPages';
 import { TourDetailPage } from './pages/TourDetailPage';
 import { ToursPage } from './pages/ToursPage';
@@ -34,6 +35,7 @@ export const router = createBrowserRouter(
         { path: 'prijava', element: <GuestOnly><LoginPage /></GuestOnly> },
         { path: 'registracija', element: <GuestOnly><RegisterPage /></GuestOnly> },
         { path: 'profil', element: <RequireAuth><ProfilePage /></RequireAuth> },
+        { path: 'obavjestenja/odjava', element: <UnsubscribePage /> },
         { path: 'odabir', element: <SelectionPage /> },
         { path: 'moje-prijave', element: <RequireHiker><MyRegistrationsPage /></RequireHiker> },
         { path: 'moja-clanstva', element: <RequireHiker><MyMembershipsPage /></RequireHiker> },

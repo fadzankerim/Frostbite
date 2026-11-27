@@ -2,6 +2,7 @@
 from django.db import IntegrityError, transaction
 
 from audit.log import audit
+from notifications import events as notifications
 
 from .models import User
 
@@ -26,3 +27,4 @@ def register_hiker(request, data):
     except IntegrityError:
         User().set_password(data['password1'])        # izjednačavanje vremena odgovora
         audit(request, 'REGISTRACIJA_DUPLIKAT', 'user', details='email već postoji')
+        notifications.duplicate_registration(data['email'])

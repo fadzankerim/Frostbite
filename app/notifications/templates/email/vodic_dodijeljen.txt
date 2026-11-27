@@ -1,0 +1,6 @@
+{% extends "email/base.txt" %}{% block body %}Admin društva {{ club }} vas je dodijelio kao vodiča ture „{{ tour }}“.
+
+Polazak: {{ start }}
+Mjesto okupljanja: {{ meeting_point }}
+
+Panel za vođenje: {{ url }}{% endblock %}

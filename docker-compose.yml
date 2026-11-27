@@ -33,7 +33,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    environment:
+    environment: &backend-env
       FROSTBITE_ENV: production
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?Postavite DJANGO_SECRET_KEY u .env}
       DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost}
@@ -42,8 +42,28 @@ services:
       DB_PASSWORD: ${DB_PASSWORD}
       DB_HOST: db
       DB_PORT: "5432"
+      # obavještenja (bez EMAIL_HOST slanje je isključeno)
+      FROSTBITE_PUBLIC_URL: ${FROSTBITE_PUBLIC_URL:-https://localhost}
+      EMAIL_HOST: ${EMAIL_HOST:-}
+      EMAIL_PORT: ${EMAIL_PORT:-587}
+      EMAIL_HOST_USER: ${EMAIL_HOST_USER:-}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}
+      DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-Frostbite <obavjestenja@frostbite.test>}
     networks: [internal, web]
     # Kod je samo za čitanje; Gunicorn koristi /dev/shm za svoje privremene datoteke
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+
+  # Slanje obavještenja iz outboxa svake minute. Jedini servis s izlazom na internet (SMTP).
+  notifier:
+    image: frostbite-backend
+    restart: unless-stopped
+    depends_on: [backend]
+    environment: *backend-env
+    command: ["sh", "-c", "while true; do python manage.py send_notifications; sleep 60; done"]
+    networks: [internal, web]
     read_only: true
     tmpfs: [/tmp]
     cap_drop: [ALL]

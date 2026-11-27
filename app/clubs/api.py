@@ -9,6 +9,7 @@ from rest_framework.response import Response
 
 from audit.log import audit
 from frostbite.api import ApiView, IsHiker
+from notifications import events as notifications
 from tours.api import tour_summary
 from tours.queries import public_tours
 
@@ -72,6 +73,7 @@ class MembershipRequestView(ApiView):
         try:
             with transaction.atomic():
                 m = ClubMembership.objects.create(club=club, user=request.user)
+                notifications.membership_requested(m)
         except IntegrityError:
             return Response({'detail': 'Već imate aktivan zahtjev ili članstvo u ovom društvu.'}, status=400)
         audit(request._request, 'CLANSTVO_ZAHTJEV', 'club_membership', m.pk, details=f'drustvo={club.pk}')

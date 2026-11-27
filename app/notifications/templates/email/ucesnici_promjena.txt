@@ -1,0 +1,5 @@
+{% extends "email/base.txt" %}{% block body %}{{ name }}: {{ action_lower }} na turi „{{ tour }}“ ({{ start }}).
+
+Prijavljeno: {{ registered }} od {{ max }}.
+
+Spisak učesnika (lični podaci samo u aplikaciji): {{ url }}{% endblock %}

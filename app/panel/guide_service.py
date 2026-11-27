@@ -16,6 +16,7 @@ from audit.log import audit
 from badges import rules as badge_events
 from badges.rules import club_admin_users
 from badges.services import notify as notify_badges
+from notifications import events as notifications
 from tours.models import Tour, TourGuide, TourRegistration, TourReport
 
 from .forms import ReportForm
@@ -81,6 +82,7 @@ def apply(request, pk):
     try:
         with transaction.atomic():
             tg = TourGuide.objects.create(tour=tour, user=request.user)
+            notifications.guide_applied(tg)
     except IntegrityError:
         raise GuideError('Već ste se prijavili za vođenje ove ture.')
     audit(request, 'VODIC_PRIJAVA', 'tour_guide', tg.pk, details=f'tura={tour.pk}')

@@ -1,0 +1,7 @@
+{% extends "email/base.txt" %}{% block body %}Sutra je tura „{{ tour }}“.
+
+Polazak: {{ start }}
+Mjesto okupljanja: {{ meeting_point }}
+{% if equipment %}Potrebna oprema: {{ equipment }}
+{% endif %}
+Ako ne možete ići, javite se društvu {{ club }}. Detalji ture: {{ url }}{% endblock %}

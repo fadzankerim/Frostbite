@@ -1,10 +1,12 @@
 // Profil (F07) i promjena lozinke (F08).
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
+import { useLocation } from 'react-router';
 
 import { displayName, useMe } from '../api/auth';
 import { ApiError } from '../api/client';
 import { useChangePassword, useProfile, useUpdateProfile, type Profile } from '../api/hiker';
 import { MyBadgesSection } from '../components/Badges';
+import { NotificationSettings } from '../components/NotificationSettings';
 import { Field, Notice, PasswordInput, SubmitButton } from '../components/forms';
 import { Frosti } from '../components/Frosti';
 import { Loading } from '../components/guards';
@@ -100,6 +102,12 @@ function PasswordForm({ email }: { email: string }) {
 export function ProfilePage() {
   const { data } = useMe();
   const profile = useProfile();
+  const { hash } = useLocation();
+  const loaded = profile.isSuccess;
+  // linkovi iz emaila vode na /profil#obavjestenja: nakon učitavanja skrol do sekcije
+  useEffect(() => {
+    if (loaded && hash) document.getElementById(hash.slice(1))?.scrollIntoView({ block: 'start' });
+  }, [loaded, hash]);
   if (!data?.authenticated) return null;     // RequireAuth je već preusmjerio
   const { user } = data;
   const roles = (Object.keys(ROLE_LABELS) as (keyof typeof ROLE_LABELS)[]).filter((r) => user.roles[r]);
@@ -126,6 +134,7 @@ export function ProfilePage() {
           <PasswordForm email={profile.data.email} />
         </div>
       )}
+      <NotificationSettings />
       <MyBadgesSection />
     </section>
   );

@@ -15,6 +15,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from audit.log import audit
+from notifications import events as notifications
 
 
 def _burn_hash(password):
@@ -58,6 +59,7 @@ class LockoutEmailBackend(ModelBackend):
                 locked.failed_login_count = 0
                 locked.locked_until = now + timedelta(minutes=settings.LOCKOUT_MINUTES)
                 action = 'NALOG_ZAKLJUCAN'
+                notifications.account_locked(locked)
             else:
                 action = 'LOGIN_NEUSPJEH'
             locked.save(update_fields=['failed_login_count', 'locked_until'])

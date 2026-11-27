@@ -20,6 +20,7 @@ from rest_framework.response import Response
 
 from audit.log import audit
 from frostbite.api import ApiView, form_errors
+from notifications import events as notifications
 
 from .forms import BosnianPasswordChangeForm, LoginForm, ProfileForm, RegistrationForm
 from .permissions import is_club_admin, is_guide
@@ -167,5 +168,6 @@ class PasswordChangeView(ApiView):
                             status=status.HTTP_400_BAD_REQUEST)
         user = form.save()
         update_session_auth_hash(request._request, user)
+        notifications.password_changed(user)
         audit(request._request, 'LOZINKA_PROMJENA', 'user', user.pk)
         return Response({'detail': 'Lozinka je promijenjena.'})

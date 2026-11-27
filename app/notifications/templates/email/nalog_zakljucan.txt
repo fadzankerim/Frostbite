@@ -1,0 +1,3 @@
+{% extends "email/base.txt" %}{% block body %}Nakon više neuspješnih pokušaja prijave vaš nalog je privremeno zaključan na {{ minutes }} minuta.
+
+Ako to niste bili vi, neko možda pokušava pogoditi vašu lozinku. Nakon otključavanja promijenite lozinku u profilu.{% endblock %}

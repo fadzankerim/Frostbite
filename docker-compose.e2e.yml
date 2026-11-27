@@ -10,6 +10,8 @@
 services:
   backend:
     image: frostbite-e2e-backend
+  notifier:
+    image: frostbite-e2e-backend
   web:
     image: frostbite-e2e-web
     ports: !override

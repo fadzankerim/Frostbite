@@ -192,6 +192,9 @@ osim endpointa koji to izričito dozvoljavaju.
 | GET, POST | `/api/clubs/request/` | zahtjev za registraciju društva (najviše jedan na čekanju) · planinar |
 | GET, PUT | `/api/me/profile/` | vlastiti profil (email, uloge i status se ne mogu mijenjati) |
 | POST | `/api/me/password/` | promjena lozinke uz staru; ostale sesije se odjavljuju |
+| GET, PUT | `/api/me/notifications/` | postavke obavještenja za kategorije vlastitih uloga (`odmah`, `pregled`, `iskljuceno`); sigurnosna se ne može isključiti |
+| POST | `/api/notifications/unsubscribe/` | `{"token"}`: odjava od jedne kategorije sa stranice `/obavjestenja/odjava` |
+| POST | `/api/notifications/unsubscribe/<token>/` | odjava jednim klikom iz email klijenta (RFC 8058, bez CSRF-a; ovlaštenje je potpisan token) |
 | GET | `/api/badges/` | katalog bedževa (javno) i ukupan broj dodijeljenih |
 | GET | `/api/me/badges/` | vlastiti bedževi uloga korisnika: `earned`, `seen`, `progress`/`goal` |
 | POST | `/api/me/badges/seen/` | označi nove bedževe kao viđene |
@@ -288,10 +291,41 @@ objavljena (i samo za članove, i popunjena s listom čekanja), prijave zatvoren
 za evidenciju prisustva), održana (s izvještajem) i otkazana. Domen `.test` i nazivi društava su
 izmišljeni, da se ne mogu zamijeniti sa stvarnim osobama ili društvima.
 
+## Obavještenja (email)
+
+Aplikacija `app/notifications/` šalje obavještenja planinarima, vodičima, adminima društava i
+sistemskom adminu (popis događaja: handoff, poglavlje 5.1).
+
+- **Outbox:** radnja (prijava na turu, objava, odluka...) u istoj transakciji upisuje red u tabelu
+  `notification_outbox`. Ako radnja ne uspije, obavještenja nema; greška pri pravljenju
+  obavještenja se samo loguje i ne ruši radnju.
+- **Slanje:** `manage.py send_notifications` svake minute (systemd `frostbite-notify.timer` na
+  serveru, servis `notifier` u Dockeru). Dodaje i zakazana obavještenja (podsjetnik 24 h prije ture,
+  upozorenje adminu za turu bez vodiča 3 dana prije polaska), šalje dospjele redove, ponavlja
+  neuspjele (najviše 5 puta) i ograničava broj emailova po korisniku na sat.
+- **Postavke:** profil → „Obavještenja na email“. Pregled (digest) skuplja obavještenja u jedan
+  email ujutro (vodiču dnevno, nove ture sedmično). Svaki email ima link za odjavu i zaglavlje
+  `List-Unsubscribe`, osim sigurnosnih (promjena lozinke, zaključan ili blokiran nalog).
+- **Privatnost:** emailovi sadrže samo nazive, termin, mjesto polaska, imena i linkove. Telefoni,
+  hitni kontakti i zdravstvene napomene nikad ne idu u email (provjerava test).
+
+Podešavanje (env varijable, na serveru u `/etc/frostbite/app.env`):
+
+| Varijabla | Značenje |
+|---|---|
+| `EMAIL_HOST`, `EMAIL_PORT` (587), `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, `EMAIL_USE_TLS` (1) | SMTP (npr. AWS SES ili vanjski servis) |
+| `DEFAULT_FROM_EMAIL` | pošiljalac, npr. `Frostbite <obavjestenja@domen.ba>` |
+| `FROSTBITE_PUBLIC_URL` | adresa aplikacije za linkove u emailovima (deploy je postavlja na `https://<IP>`) |
+| `FROSTBITE_EMAIL_NOTE` | opciona napomena na dnu emaila (npr. da linkovi rade samo preko VPN-a) |
+
+**Bez `EMAIL_HOST` u produkciji slanje je isključeno:** redovi ostaju u outboxu i ističu po roku
+(3 dana, pregled 8 dana), pa uključivanje SMTP-a kasnije ne pošalje stara obavještenja. U razvoju
+emailovi idu u konzolu (`runserver`), a u testovima u memoriju.
+
 ## Testovi
 
 ```bash
-cd app && .venv/bin/python manage.py test       # 132 testa API-ja
+cd app && .venv/bin/python manage.py test       # 162 testa API-ja
 cd frontend && npm run check && npm test         # TypeScript, ESLint, dizajn + 59 unit testova
 ./docker/e2e.sh                                  # E2E testovi u pregledaču (Playwright) nad Dockerom
 ```

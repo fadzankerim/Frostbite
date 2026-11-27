@@ -11,6 +11,7 @@ from audit.log import audit
 from badges import rules as badge_events
 from badges.rules import club_admin_users
 from badges.services import notify as notify_badges
+from notifications import events as notifications
 from clubs.models import Club, ClubMembership
 
 from .models import Tour, TourGuide, TourRegistration
@@ -61,6 +62,7 @@ def register(request, tour_id):
             reg = TourRegistration.objects.create(tour=tour, user=user, status=status)
         except IntegrityError:
             raise RegistrationError('Već ste prijavljeni na ovu turu.')
+        notifications.registration_created(reg)
 
     audit(request, 'TURA_PRIJAVA', 'tour_registration', reg.pk, details=f'tura={tour.pk} status={status}')
     notify_badges(badge_events.REGISTRATION, [user, *club_admin_users(tour.club)])
@@ -92,6 +94,7 @@ def cancel(request, registration_id):
             if promoted:
                 promoted.status = TourRegistration.Status.REGISTERED
                 promoted.save(update_fields=['status', 'updated_at'])
+        notifications.registration_cancelled(reg, was_registered, promoted)
 
     audit(request, 'TURA_ODJAVA', 'tour_registration', reg.pk, details=f'tura={tour.pk}')
     if promoted:

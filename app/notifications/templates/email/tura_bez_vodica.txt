@@ -1,0 +1,3 @@
+{% extends "email/base.txt" %}{% block body %}Društvo {{ club }} ima turu bez vodiča: „{{ tour }}“, polazak {{ start }}.
+
+Ako želite voditi turu, prijavite se u panelu za vođenje: {{ url }}{% endblock %}

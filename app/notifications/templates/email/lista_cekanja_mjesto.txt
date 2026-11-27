@@ -1,0 +1,6 @@
+{% extends "email/base.txt" %}{% block body %}Neko se odjavio s ture „{{ tour }}“, pa ste s liste čekanja prebačeni među prijavljene.
+
+Polazak: {{ start }}
+Mjesto okupljanja: {{ meeting_point }}
+
+Ako ipak ne možete ići, odjavite se do roka da mjesto dobije sljedeći: {{ url }}{% endblock %}

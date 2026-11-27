@@ -1,0 +1,10 @@
+{% autoescape off %}Zdravo {{ first_name }},
+
+{% block body %}{% endblock %}
+
+-- 
+Frostbite · planinarske ture
+{% if note %}{{ note }}
+{% endif %}Postavke obavještenja: {{ settings_url }}{% if unsubscribe_url %}
+Odjava od ove vrste obavještenja: {{ unsubscribe_url }}{% endif %}
+{% endautoescape %}

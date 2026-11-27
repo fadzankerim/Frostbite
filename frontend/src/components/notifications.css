@@ -1,0 +1,23 @@
+/* Postavke obavještenja (profil) i stranica za odjavu iz emaila */
+.notif-section { margin-top: 20px; display: grid; gap: 10px; }
+.notif-list { list-style: none; margin: 0; padding: 0; display: grid; }
+.notif-row {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 16px; align-items: center;
+  padding: 14px 0; border-top: 1px solid var(--line);
+}
+.notif-copy { display: grid; gap: 2px; }
+.notif-copy .muted { font-size: 0.85rem; }
+.notif-modes { display: inline-flex; border: 1px solid var(--line-strong); border-radius: 999px; padding: 3px; gap: 2px; margin: 0; }
+.notif-mode {
+  position: relative; padding: 5px 12px; border-radius: 999px; font-size: 0.82rem; cursor: pointer; color: var(--ink-2);
+  transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+}
+.notif-mode input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.notif-mode:hover { color: var(--ink); }
+.notif-mode.is-on { background: var(--fun-ink); color: var(--fun-paper); }
+.notif-mode:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+.notif-locked { font-size: 0.62rem; padding: 6px 10px; border: 1px dashed var(--line-strong); border-radius: 999px; }
+.notif-row .field-error { grid-column: 1 / -1; }
+@media (max-width: 640px) { .notif-row { grid-template-columns: 1fr; } .notif-modes { justify-self: start; } }
+
+.unsub { max-width: 520px; margin: 0 auto; display: grid; gap: 14px; justify-items: center; text-align: center; }

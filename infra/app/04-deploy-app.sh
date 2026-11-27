@@ -65,6 +65,10 @@ EOF
   chown root:"$APP_USER" "$ENV_DIR/app.env"; chmod 640 "$ENV_DIR/app.env"
   echo "[i] Generisan $ENV_DIR/app.env (SECRET_KEY)."
 fi
+# Obavještenja: adresa za linkove u emailovima. SMTP se upisuje ručno u app.env kad bude spreman
+# (EMAIL_HOST, EMAIL_PORT, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD, DEFAULT_FROM_EMAIL); bez EMAIL_HOST
+# slanje je isključeno, a obavještenja ostaju u outboxu dok im ne istekne rok.
+grep -q '^FROSTBITE_PUBLIC_URL=' "$ENV_DIR/app.env" || echo "FROSTBITE_PUBLIC_URL=https://$APP_IP" >> "$ENV_DIR/app.env"
 
 # Pomoćna komanda za manage.py sa produkcijskim okruženjem, kao korisnik aplikacije:
 #   sudo frostbite-manage migrate | create_system_admin | shell ...
@@ -151,10 +155,57 @@ UMask=0027
 WantedBy=multi-user.target
 EOF
 
+# Slanje obavještenja: oneshot servis svake minute (systemd ne pokreće novi dok stari radi)
+cat > /etc/systemd/system/frostbite-notify.service <<EOF
+[Unit]
+Description=Frostbite - slanje obavještenja iz outboxa
+After=network-online.target postgresql.service
+
+[Service]
+Type=oneshot
+User=$APP_USER
+Group=$APP_USER
+EnvironmentFile=$ENV_DIR/db.env
+EnvironmentFile=$ENV_DIR/app.env
+Environment=PYTHONDONTWRITEBYTECODE=1
+WorkingDirectory=$BASE/app
+ExecStart=$BASE/venv/bin/python manage.py send_notifications
+TimeoutStartSec=5min
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictNamespaces=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+ReadWritePaths=/var/log/frostbite
+UMask=0027
+EOF
+
+cat > /etc/systemd/system/frostbite-notify.timer <<'EOF'
+[Unit]
+Description=Frostbite - obavještenja svake minute
+
+[Timer]
+OnCalendar=minutely
+AccuracySec=10s
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF
+
 systemctl daemon-reload
 systemctl enable --now frostbite.socket >/dev/null
 systemctl enable frostbite.service >/dev/null 2>&1 || true
 systemctl restart frostbite.service
+systemctl enable --now frostbite-notify.timer >/dev/null
 
 # --- Nginx kao reverse proxy -----------------------------------------------
 cat > /etc/nginx/conf.d/01-fb-ratelimit.conf <<'EOF'

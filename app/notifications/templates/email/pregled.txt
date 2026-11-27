@@ -1,0 +1,4 @@
+{% extends "email/base.txt" %}{% block body %}{{ title }}:
+{% for item in items %}
+- {{ item.summary }}{% if item.url %}
+  {{ item.url }}{% endif %}{% endfor %}{% endblock %}

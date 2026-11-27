@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'audit',
     'panel',
     'badges',
+    'notifications',
 ]
 
 MIDDLEWARE = [
@@ -158,6 +159,25 @@ LANGUAGES = [('bs', 'Bosanski')]
 TIME_ZONE = 'Europe/Sarajevo'
 USE_I18N = True
 USE_TZ = True
+
+# --- Email i obavještenja (handoff, poglavlje 5) ------------------------------
+# Sve iz env varijabli. Bez EMAIL_HOST u produkciji slanje je isključeno (redovi ostaju u outboxu);
+# u razvoju emailovi idu u konzolu, a u testovima u memoriju (locmem).
+EMAIL_HOST = env('EMAIL_HOST', '')
+EMAIL_PORT = int(env('EMAIL_PORT', '587'))
+EMAIL_HOST_USER = env('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD', '')
+EMAIL_USE_TLS = env('EMAIL_USE_TLS', '1') == '1'
+EMAIL_TIMEOUT = 15
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', 'Frostbite <obavjestenja@frostbite.test>')
+if EMAIL_HOST:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+elif not PRODUCTION:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+NOTIFICATIONS_ENABLED = bool(EMAIL_HOST) or not PRODUCTION
+# adresa aplikacije za linkove u emailovima (npr. https://frostbite.ba); napomena ispod svakog emaila (npr. da linkovi rade samo preko VPN-a)
+FROSTBITE_PUBLIC_URL = env('FROSTBITE_PUBLIC_URL', 'https://localhost')
+FROSTBITE_EMAIL_NOTE = env('FROSTBITE_EMAIL_NOTE', '')
 
 # --- Logovanje -------------------------------------------------------------
 LOG_DIR = env('DJANGO_LOG_DIR')

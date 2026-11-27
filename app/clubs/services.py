@@ -3,6 +3,7 @@ odobri društvo (admin_clubs() uzima samo odobrena društva)."""
 from django.db import IntegrityError, transaction
 
 from audit.log import audit
+from notifications import events as notifications
 
 from .forms import ClubRequestForm
 from .models import Club, ClubAdmin
@@ -37,6 +38,7 @@ def request_club(request, data):
             club.created_by = request.user
             club.save()
             ClubAdmin.objects.create(club=club, user=request.user)
+            notifications.club_requested(club)
     except IntegrityError:
         raise ClubRequestError(NAME_TAKEN, {'name': [NAME_TAKEN]})
     audit(request, 'DRUSTVO_ZAHTJEV', 'club', club.pk)

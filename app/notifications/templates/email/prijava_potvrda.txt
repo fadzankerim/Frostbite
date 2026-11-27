@@ -1,0 +1,7 @@
+{% extends "email/base.txt" %}{% block body %}{% if waitlist %}Tura „{{ tour }}“ je popunjena, pa ste upisani na listu čekanja. Ako se neko odjavi, mjesto automatski dobijate vi i javićemo vam.{% else %}Prijavljeni ste na turu „{{ tour }}“.{% endif %}
+
+Društvo: {{ club }}
+Polazak: {{ start }}
+Mjesto okupljanja: {{ meeting_point }}
+
+Detalji ture: {{ url }}{% endblock %}
