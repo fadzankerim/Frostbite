@@ -15,3 +15,6 @@ app/staticfiles
 **/*.pem
 certs
 docs
+**/e2e/.auth
+**/e2e-report
+**/e2e-results

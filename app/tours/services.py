@@ -22,6 +22,10 @@ class RegistrationError(Exception):
     pass
 
 
+class RegistrationNotFound(RegistrationError):
+    """Prijava ne postoji ili nije korisnikova (isti odgovor: 404, IDOR zaštita)."""
+
+
 def has_valid_membership(user, club):
     today = timezone.localdate()
     return ClubMembership.objects.filter(
@@ -71,7 +75,7 @@ def cancel(request, registration_id):
         reg = (TourRegistration.objects.select_related('tour')
                .filter(pk=registration_id, user=user, status__in=ACTIVE).first())
         if reg is None:
-            raise RegistrationError('Prijava nije pronađena.')
+            raise RegistrationNotFound('Prijava nije pronađena.')
         tour = Tour.objects.select_for_update().get(pk=reg.tour_id)
         if tour.status not in (Tour.Status.PUBLISHED, Tour.Status.CLOSED) or timezone.now() >= tour.registration_deadline:
             raise RegistrationError('Rok za odjavu je istekao.')

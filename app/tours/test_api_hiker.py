@@ -86,7 +86,12 @@ class RegisterApiTests(Api):
             r = self.call(a, 'post', 'api_tours:register', t.pk)
             self.assertEqual(r.status_code, 400, t.name)
             self.assertIn(msg, r.json()['detail'])
+        blocked = lambda c: self.call(c, 'get', 'api_tours:detail', self.members.pk).json()['membersOnlyBlocked']  # noqa: E731
+        self.assertTrue(blocked(a))                          # nečlan: umjesto dugmeta objašnjenje
+        self.assertFalse(blocked(self.c))                    # anonimni: ne zna se, vodi na prijavu
+        self.assertFalse(self.call(a, 'get', 'api_tours:detail', self.t2.pk).json()['membersOnlyBlocked'])
         ClubMembership.objects.create(club=self.club, user=self.ana, status=ClubMembership.Status.APPROVED)
+        self.assertFalse(blocked(a))
         self.assertEqual(self.call(a, 'post', 'api_tours:register', self.members.pk).status_code, 201)
 
     def test_guide_cannot_join_own_tour(self):
@@ -123,7 +128,7 @@ class MyRegistrationsApiTests(Api):
         self.call(self.client_for(self.bob), 'post', 'api_tours:register', self.t2.pk)
         bobs = TourRegistration.objects.get(user=self.bob)
         r = self.call(self.client_for(self.ana), 'post', 'api_me:cancel', bobs.pk)
-        self.assertEqual(r.status_code, 400)
+        self.assertEqual(r.status_code, 404)
         self.assertEqual(r.json()['detail'], 'Prijava nije pronađena.')
         bobs.refresh_from_db()
         self.assertEqual(bobs.status, 'PRIJAVLJEN')

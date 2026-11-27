@@ -1,0 +1,17 @@
+# E2E testovi (frontend/e2e/) nad zasebnim stackom. Pokreće se samo kroz docker/e2e.sh:
+#
+#   ./docker/e2e.sh                 # podigne stack s praznom bazom, ubaci E2E podatke, pokrene testove
+#
+# Razlike u odnosu na docker-compose.yml:
+#  - zaseban projekat (frostbite-e2e): vlastiti kontejneri, mreže i volumeni; razvojni stack ostaje netaknut
+#  - baza frostbite_e2e (seed_e2e odbija svaku drugu bazu), briše se prije svakog pokretanja
+#  - portovi samo na 127.0.0.1 (8080 -> 80, 8443 -> 443), ne na svim interfejsima
+#  - postavke su iste kao u produkciji (FROSTBITE_ENV=production): HTTPS, __Host- kolačići, zaglavlja
+services:
+  backend:
+    image: frostbite-e2e-backend
+  web:
+    image: frostbite-e2e-web
+    ports: !override
+      - "127.0.0.1:8080:80"
+      - "127.0.0.1:8443:443"

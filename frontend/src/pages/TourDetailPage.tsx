@@ -66,6 +66,14 @@ function RegisterPanel({ t }: { t: TourDetail }) {
   }
   if (t.deadlinePassed) return <Notice>Rok za prijavu je istekao.</Notice>;
   if (!t.canRegister) return null;
+  if (t.membersOnlyBlocked) {
+    return (
+      <>
+        <Notice>Ova tura je samo za članove društva {t.club.name} s važećim članstvom.</Notice>
+        <Link className="btn btn-ghost btn-block" to={`/drustva/${t.club.id}`}>Zatraži članstvo u društvu</Link>
+      </>
+    );
+  }
 
   return (
     <>

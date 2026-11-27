@@ -74,6 +74,8 @@ class CancelRegistrationView(ApiView):
     def post(self, request, pk):
         try:
             reg = services.cancel(request._request, pk)
+        except services.RegistrationNotFound as e:
+            return Response({'detail': str(e)}, status=status.HTTP_404_NOT_FOUND)
         except services.RegistrationError as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'detail': f'Odjavljeni ste sa ture „{reg.tour.name}“.'})

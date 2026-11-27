@@ -260,13 +260,40 @@ Komanda `seed_demo` kreira sljedeće naloge. Lozinka za sve je `Demo-Lozinka-202
 | `planinar1@primjer.ba` | planinar, član PD Bjelašnica |
 | `planinar2@primjer.ba` | planinar |
 
-Demo podaci postoje samo lokalno: `seed_demo` odbija da se pokrene u produkciji i na PostgreSQL bazi. Nalozi za recenzente na serveru kreiraju se posebno, sa jakim lozinkama.
+Demo podaci postoje samo lokalno: `seed_demo` odbija da se pokrene u produkciji i na PostgreSQL bazi.
+
+### Nalozi za recenzente (server)
+
+Politika (poglavlje 5.2) predviđa naloge za sve grupe korisnika i ture u svim statusima. Na serveru
+ih kreira komanda `seed_review`, **jednom**, nad bazom bez korisničkih podataka (ranije kreirani
+sistemski admini su dozvoljeni):
+
+```bash
+ssh fb-app 'sudo frostbite-manage seed_review --potvrdi'
+```
+
+| Nalog | Uloga |
+|---|---|
+| `sistem@frostbite.test` | sistemski admin |
+| `admin.alfa@frostbite.test`, `admin.beta@frostbite.test` | admin društva PD Alfa (test) i PD Beta (test) |
+| `vodic1.alfa`, `vodic2.alfa`, `vodic1.beta`, `vodic2.beta` `@frostbite.test` | po dva vodiča u svakom društvu |
+| `planinar1@frostbite.test` | planinar, član PD Alfa, ima zdravstvenu napomenu (testni podatak) |
+| `planinar2@frostbite.test` | planinar, zahtjev za članstvo u PD Alfa čeka odluku |
+| `planinar3@frostbite.test` | planinar, član PD Beta, podnio zahtjev za registraciju PD Gama |
+
+Svaki nalog dobija vlastitu nasumičnu lozinku od 20 znakova. Lozinke se **ispišu samo jednom** i
+nigdje se ne čuvaju (u bazi je samo hash), pa ispis treba odmah sačuvati van servera (npr. u
+`users.txt`, koji je u `.gitignore`) i predati recenzentima. Ture pokrivaju sve statuse: nacrt,
+objavljena (i samo za članove, i popunjena s listom čekanja), prijave zatvorene (jučerašnja tura,
+za evidenciju prisustva), održana (s izvještajem) i otkazana. Domen `.test` i nazivi društava su
+izmišljeni, da se ne mogu zamijeniti sa stvarnim osobama ili društvima.
 
 ## Testovi
 
 ```bash
-cd app && .venv/bin/python manage.py test       # 108 testova API-ja
-cd frontend && npm run check && npm test         # TypeScript, ESLint, dizajn + 53 unit testa
+cd app && .venv/bin/python manage.py test       # 132 testa API-ja
+cd frontend && npm run check && npm test         # TypeScript, ESLint, dizajn + 59 unit testova
+./docker/e2e.sh                                  # E2E testovi u pregledaču (Playwright) nad Dockerom
 ```
 
 Pored ispravnog rada testovi provjeravaju i sigurnosna pravila:
@@ -281,6 +308,32 @@ Pored ispravnog rada testovi provjeravaju i sigurnosna pravila:
 - otvoreno preusmjeravanje nakon prijave (frontend).
 
 Test koji provjerava PostgreSQL trigger za evidenciju aktivnosti preskače se lokalno (SQLite) i izvršava se na serveru.
+
+### E2E testovi (`frontend/e2e/`)
+
+`./docker/e2e.sh` podigne **zaseban** Docker stack (projekat `frostbite-e2e`, baza `frostbite_e2e`,
+portovi samo na `127.0.0.1:8080` i `127.0.0.1:8443`), ubaci podatke komandom `seed_e2e` i pokrene
+Playwright u Chromiumu. Postavke su iste kao u produkciji: Nginx, HTTPS, `__Host-` kolačići,
+sigurnosna zaglavlja. Baza se briše prije svakog pokretanja, a razvojni stack ostaje netaknut.
+
+Prvi put: `cd frontend && npm ci && npx playwright install chromium`.
+
+```bash
+./docker/e2e.sh                          # svi testovi, pa gašenje stacka
+./docker/e2e.sh e2e/security.spec.ts     # jedan fajl (argumenti idu Playwrightu)
+E2E_KEEP=1 ./docker/e2e.sh               # stack ostaje na https://localhost:8443
+cd frontend && npx playwright show-report e2e-report    # izvještaj s tragovima grešaka
+```
+
+| Fajl | Šta provjerava |
+|---|---|
+| `public.spec.ts` | javni dio; nacrti i društva na čekanju nisu javni; zaštićene stranice traže prijavu |
+| `auth.spec.ts` | generička poruka greške, zaključavanje naloga, registracija bez otkrivanja naloga, odjava gasi sesiju, promjena lozinke gasi ostale sesije, `?next=` ne vodi na drugi domen |
+| `security.spec.ts` | HTTP→HTTPS, sigurnosna zaglavlja (bez duplikata), kolačići, CSRF i Origin, samo JSON, prava po ulogama, IDOR (404), nacrt nije javan, sistemski admin ne vidi lične podatke, nema source mapa ni skrivenih datoteka |
+| `hiker.spec.ts`, `guide.spec.ts`, `admin.spec.ts`, `system.spec.ts` | glavni tokovi svake uloge u pregledaču i zabranjene stranice za tu ulogu |
+
+`seed_e2e` odbija da radi bez `FROSTBITE_E2E=1` i nad bazom čije ime ne završava na `_e2e`, pa se
+ne može slučajno pokrenuti nad pravom bazom.
 
 ## Postavljanje na AWS
 

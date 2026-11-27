@@ -45,6 +45,11 @@ export default defineConfig(
     rules: { 'no-restricted-globals': ['error', 'sessionStorage', 'indexedDB', 'fetch'] },
   },
   {
+    // E2E testovi (Playwright): fixture funkcija `use` nije React hook
+    files: ['e2e/**/*.ts', 'playwright.config.ts'],
+    rules: { 'react-hooks/rules-of-hooks': 'off' },
+  },
+  {
     // jedino mjesto koje smije zvati fetch
     files: ['src/api/client.ts'],
     rules: { 'no-restricted-globals': 'off' },
